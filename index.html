@@ -1,0 +1,246 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<title>Amendment to Application — Web Filler (LF1042)</title>
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<style>
+  :root{
+    --bg:#f6f7f9;--card:#fff;--accent:#007aff;--muted:#666;
+  }
+  *{box-sizing:border-box}
+  body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Arial;margin:18px;background:var(--bg);color:#111}
+  main{max-width:980px;margin:0 auto;background:var(--card);padding:18px;border-radius:10px;box-shadow:0 8px 28px rgba(0,0,0,0.06)}
+  h1{margin-top:0;font-size:1.25rem}
+  .section{background:#fbfbfd;border:1px solid #eee;padding:12px;border-radius:8px;margin:12px 0}
+  .section h2{margin:0 0 8px 0}
+  label{display:block;margin:8px 0;font-size:0.95rem}
+  input[type=text],select,textarea{width:100%;padding:8px;border-radius:8px;border:1px solid #ddd;margin-top:6px}
+  textarea{resize:none;overflow:hidden}
+  .row{display:flex;gap:12px;align-items:center;flex-wrap:wrap;margin:8px 0}
+  button{background:var(--accent);color:#fff;border:0;padding:10px 14px;border-radius:8px;cursor:pointer}
+  button.secondary{background:#999}
+  .actions{display:flex;gap:12px;align-items:center}
+  canvas{width:100%;height:150px;border-radius:8px;border:1px solid #ddd;background:#fff}
+  footer{margin-top:12px;color:var(--muted)}
+</style>
+</head>
+<body>
+<main>
+<h1>Amendment to Application — Web Filler</h1>
+
+<!-- Section 1 -->
+<section class="section">
+<h2>Section 1 — Life Proposed Info</h2>
+<label>Name
+  <input id="LifeProposed_Name" type="text" placeholder="FULL NAME" oninput="this.value=this.value.toUpperCase()">
+</label>
+<label>NRIC
+  <input id="Lifeproposed_NRIC" type="text" placeholder="e.g. 900101-01-1234">
+</label>
+<label>Policy No.
+  <input id="PolicyNo" type="text">
+</label>
+</section>
+
+<!-- Section 2 -->
+<section class="section">
+<h2>Section 2 — Details of Amendment</h2>
+<textarea id="Amendment_WriteDetails" placeholder="Describe the amendment in detail..." rows="5" oninput="autoResize(this)"></textarea>
+</section>
+
+<!-- Section 3 -->
+<section class="section">
+<h2>Section 3 — Signature & Policy Owner Info</h2>
+
+<label>Signed State</label>
+<select id="Signed_State">
+  <option value="">Select State</option>
+  <option>SELANGOR</option>
+  <option>K.LUMPUR</option>
+  <option>MELAKA</option>
+  <option>JOHOR</option>
+  <option>KEDAH</option>
+  <option>KELANTAN</option>
+  <option>NEGERI SEMBILAN</option>
+  <option>PAHANG</option>
+  <option>PENANG</option>
+  <option>PERAK</option>
+  <option>PERLIS</option>
+  <option>SABAH</option>
+  <option>SARAWAK</option>
+  <option>TERENGGANU</option>
+  <option>LABUAN</option>
+  <option>PUTRAJAYA</option>
+</select>
+
+<div class="row">
+  <label>Day
+    <select id="Signed_Day"><option value="">Day</option></select>
+  </label>
+  <label>Month
+    <select id="Signed_Month"><option value="">Month</option></select>
+  </label>
+  <label>Year
+    <select id="Signed_Year"><option value="">Year</option></select>
+  </label>
+</div>
+
+<h3>Witness Info</h3>
+<div class="row">
+  <label>Name
+    <input id="Sign_Witness_Name" type="text">
+  </label>
+  <label>NRIC
+    <input id="Sign_Witness_NRIC" type="text">
+  </label>
+</div>
+
+<h3>Policy Owner Info</h3>
+<label>
+  <input type="checkbox" id="sameAsLifeProposed" checked> Same as Life Proposed
+</label>
+<div class="row">
+  <label>Policy Owner Name
+    <input id="Sign_LifeProposedPO_Name" type="text">
+  </label>
+  <label>NRIC
+    <input id="Sign_LifeProposedPO_NRIC" type="text">
+  </label>
+  <label>Mobile
+    <input id="SIgn_LifeProposedPO_Mobile" type="text">
+  </label>
+</div>
+
+<h3>Policy Owner Signature</h3>
+<canvas id="sigPolicyOwner"></canvas>
+<div class="row">
+  <button type="button" id="clearSigPolicyOwner" class="secondary">Clear Signature</button>
+</div>
+
+<h3>Witness Signature</h3>
+<canvas id="sigWitness"></canvas>
+<div class="row">
+  <button type="button" id="clearSigWitness" class="secondary">Clear Signature</button>
+</div>
+</section>
+
+<!-- Actions -->
+<section class="section actions">
+  <button id="generate">Generate PDF</button>
+  <button id="resetAll" class="secondary">Reset All</button>
+</section>
+
+<footer><small>Ensure <code>Amendment to Application_LF1042_fillable.pdf</code> is in the same folder as this HTML.</small></footer>
+</main>
+
+<script src="https://unpkg.com/pdf-lib/dist/pdf-lib.min.js"></script>
+<script>
+// Auto-expand textarea
+function autoResize(t){t.style.height="auto";t.style.height=t.scrollHeight+"px";}
+
+// Populate day/month/year
+(function(){
+  const daySel=document.getElementById('Signed_Day');
+  for(let i=1;i<=31;i++){daySel.innerHTML+=`<option>${i}</option>`;}
+  const monthSel=document.getElementById('Signed_Month');
+  const months=["JANUARY","FEBRUARY","MARCH","APRIL","MAY","JUNE","JULY","AUGUST","SEPTEMBER","OCTOBER","NOVEMBER","DECEMBER"];
+  months.forEach(m=>monthSel.innerHTML+=`<option>${m}</option>`);
+  const yearSel=document.getElementById('Signed_Year');
+  const current=new Date().getFullYear();
+  for(let y=current;y>=current-5;y--){yearSel.innerHTML+=`<option>${y}</option>`;}
+})();
+
+// Same as Life Proposed toggle
+const sameCb=document.getElementById('sameAsLifeProposed');
+const poName=document.getElementById('Sign_LifeProposedPO_Name');
+const poNRIC=document.getElementById('Sign_LifeProposedPO_NRIC');
+const lifeName=document.getElementById('LifeProposed_Name');
+const lifeNRIC=document.getElementById('Lifeproposed_NRIC');
+sameCb.addEventListener('change',()=>{
+  if(sameCb.checked){
+    poName.value=lifeName.value;
+    poNRIC.value=lifeNRIC.value;
+    poName.readOnly=true;poNRIC.readOnly=true;
+  } else {poName.readOnly=false;poNRIC.readOnly=false;}
+});
+lifeName.addEventListener('input',()=>{if(sameCb.checked)poName.value=lifeName.value;});
+lifeNRIC.addEventListener('input',()=>{if(sameCb.checked)poNRIC.value=lifeNRIC.value;});
+
+// Signature setup
+function setupCanvas(id,clearId){
+  const c=document.getElementById(id),ctx=c.getContext("2d");
+  function resize(){
+    const ratio=window.devicePixelRatio||1;
+    c.width=c.offsetWidth*ratio;c.height=150*ratio;
+    ctx.setTransform(1,0,0,1,0,0);ctx.scale(ratio,ratio);
+    ctx.lineWidth=2;ctx.lineCap="round";ctx.strokeStyle="#000";
+  }
+  resize();window.addEventListener("resize",resize);
+  let draw=false;
+  function pos(e){const r=c.getBoundingClientRect();const x=(e.touches?e.touches[0].clientX:e.clientX)-r.left;const y=(e.touches?e.touches[0].clientY:e.clientY)-r.top;return{x,y};}
+  c.addEventListener("mousedown",e=>{draw=true;ctx.beginPath();ctx.moveTo(pos(e).x,pos(e).y);});
+  c.addEventListener("mousemove",e=>{if(!draw)return;ctx.lineTo(pos(e).x,pos(e).y);ctx.stroke();});
+  c.addEventListener("mouseup",()=>draw=false);
+  c.addEventListener("touchstart",e=>{e.preventDefault();draw=true;ctx.beginPath();ctx.moveTo(pos(e).x,pos(e).y);},{passive:false});
+  c.addEventListener("touchmove",e=>{e.preventDefault();if(!draw)return;ctx.lineTo(pos(e).x,pos(e).y);ctx.stroke();},{passive:false});
+  c.addEventListener("touchend",()=>draw=false);
+  document.getElementById(clearId).addEventListener("click",()=>ctx.clearRect(0,0,c.width,c.height));
+  return{canvas:c,ctx};
+}
+const sigPO=setupCanvas("sigPolicyOwner","clearSigPolicyOwner");
+const sigW=setupCanvas("sigWitness","clearSigWitness");
+
+// LocalStorage save/load
+document.querySelectorAll("input,select,textarea").forEach(el=>{
+  el.addEventListener("input",()=>localStorage.setItem(el.id,el.value));
+  const saved=localStorage.getItem(el.id);if(saved)el.value=saved;
+});
+
+// Fill PDF
+async function fillPDF(){
+  const res=await fetch("Amendment to Application_LF1042_fillable.pdf");
+  const bytes=await res.arrayBuffer();
+  const pdfDoc=await PDFLib.PDFDocument.load(bytes);
+  const form=pdfDoc.getForm();
+  function set(id){try{form.getTextField(id).setText(document.getElementById(id).value||"");}catch(e){}}
+  set("LifeProposed_Name");
+  set("Lifeproposed_NRIC");
+  set("PolicyNo");
+  set("Amendment_WriteDetails");
+  set("Signed_Day");
+  set("Signed_Month");
+  set("Signed_Year");
+  set("Signed_State");
+  set("Sign_Witness_Name");
+  set("Sign_Witness_NRIC");
+  set("Sign_LifeProposedPO_Name");
+  set("Sign_LifeProposedPO_NRIC");
+  set("SIgn_LifeProposedPO_Mobile");
+
+  const pages=pdfDoc.getPages();
+  const page=pages[0];
+  if(sigPO.canvas.toDataURL().length>100){
+    const png=await pdfDoc.embedPng(await fetch(sigPO.canvas.toDataURL()).then(r=>r.arrayBuffer()));
+    page.drawImage(png,{x:350,y:150,width:160,height:50}); // approx coords
+  }
+  if(sigW.canvas.toDataURL().length>100){
+    const png=await pdfDoc.embedPng(await fetch(sigW.canvas.toDataURL()).then(r=>r.arrayBuffer()));
+    page.drawImage(png,{x:150,y:150,width:160,height:50}); // approx coords
+  }
+
+  const pdfBytes=await pdfDoc.save();
+  const blob=new Blob([pdfBytes],{type:"application/pdf"});
+  const url=URL.createObjectURL(blob);
+  const a=document.createElement("a");
+  a.href=url;a.download="Filled_LF1042.pdf";a.click();
+  URL.revokeObjectURL(url);
+}
+
+document.getElementById("generate").addEventListener("click",fillPDF);
+document.getElementById("resetAll").addEventListener("click",()=>{
+  localStorage.clear();location.reload();
+});
+</script>
+</body>
+</html>
