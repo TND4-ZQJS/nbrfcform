@@ -36,7 +36,7 @@
   <input id="LifeProposed_Name" type="text" placeholder="FULL NAME" oninput="this.value=this.value.toUpperCase()">
 </label>
 <label>NRIC
-  <input id="Lifeproposed_NRIC" type="text" placeholder="e.g. 900101-01-1234">
+  <input id="LifeProposed_NRIC" type="text" placeholder="e.g. 900101-01-1234">
 </label>
 <label>Policy No.
   <input id="PolicyNo" type="text">
@@ -108,7 +108,7 @@
     <input id="Sign_LifeProposedPO_NRIC" type="text">
   </label>
   <label>Mobile
-    <input id="SIgn_LifeProposedPO_Mobile" type="text">
+    <input id="Sign_LifeProposedPO_Mobile" type="text">
   </label>
 </div>
 
@@ -205,7 +205,7 @@ async function fillPDF(){
   const form=pdfDoc.getForm();
   function set(id){try{form.getTextField(id).setText(document.getElementById(id).value||"");}catch(e){}}
   set("LifeProposed_Name");
-  set("Lifeproposed_NRIC");
+  set("LifeProposed_NRIC");
   set("PolicyNo");
   set("Amendment_WriteDetails");
   set("Signed_Day");
@@ -216,7 +216,7 @@ async function fillPDF(){
   set("Sign_Witness_NRIC");
   set("Sign_LifeProposedPO_Name");
   set("Sign_LifeProposedPO_NRIC");
-  set("SIgn_LifeProposedPO_Mobile");
+  set("Sign_LifeProposedPO_Mobile");
 
   const pages=pdfDoc.getPages();
   const page=pages[0];
