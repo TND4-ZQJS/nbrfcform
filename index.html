@@ -86,16 +86,6 @@
   </label>
 </div>
 
-<h3>Witness Info</h3>
-<div class="row">
-  <label>Name
-    <input id="Sign_Witness_Name" type="text">
-  </label>
-  <label>NRIC
-    <input id="Sign_Witness_NRIC" type="text">
-  </label>
-</div>
-
 <h3>Policy Owner Info</h3>
 <label>
   <input type="checkbox" id="sameAsLifeProposed" checked> Same as Life Proposed
@@ -118,11 +108,20 @@
   <button type="button" id="clearSigPolicyOwner" class="secondary">Clear Signature</button>
 </div>
 
-<h3>Witness Signature</h3>
+<h3>Witness Info & Signature</h3>
+<div class="row">
+  <label>Name
+    <input id="Sign_Witness_Name" type="text">
+  </label>
+  <label>NRIC
+    <input id="Sign_Witness_NRIC" type="text">
+  </label>
+</div>
 <canvas id="sigWitness"></canvas>
 <div class="row">
   <button type="button" id="clearSigWitness" class="secondary">Clear Signature</button>
 </div>
+
 </section>
 
 <!-- Actions -->
@@ -156,7 +155,7 @@ const sameCb=document.getElementById('sameAsLifeProposed');
 const poName=document.getElementById('Sign_LifeProposedPO_Name');
 const poNRIC=document.getElementById('Sign_LifeProposedPO_NRIC');
 const lifeName=document.getElementById('LifeProposed_Name');
-const lifeNRIC=document.getElementById('LifeProposed_NRIC'); // ✅ fixed ID
+const lifeNRIC=document.getElementById('LifeProposed_NRIC'); // fixed ID
 sameCb.addEventListener('change',()=>{
   if(sameCb.checked){
     poName.value=lifeName.value;
@@ -197,7 +196,7 @@ document.querySelectorAll("input,select,textarea").forEach(el=>{
   el.addEventListener("input",()=>localStorage.setItem(el.id,el.value));
   const saved=localStorage.getItem(el.id);if(saved)el.value=saved;
 });
-document.querySelectorAll("textarea").forEach(t=>autoResize(t)); // resize after restore
+document.querySelectorAll("textarea").forEach(t=>autoResize(t));
 
 // Fill PDF
 async function fillPDF(){
@@ -213,7 +212,6 @@ async function fillPDF(){
     catch(e){console.warn("Missing field:",id);}
   }
 
-  // Fill all known fields
   ["PolicyNo","Amendment_WriteDetails","Signed_Day","Signed_Month","Signed_Year",
    "Sign_Witness_Name","Sign_Witness_NRIC","Sign_LifeProposedPO_Name",
    "Sign_LifeProposedPO_NRIC","Sign_LifeProposedPO_Mobile",
