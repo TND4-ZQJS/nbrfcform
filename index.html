@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="utf-8" />
-<title>Amendment to Application — Web Filler (LF1042)</title>
+<title>Amendment to Application — Web Filler</title>
 <meta name="viewport" content="width=device-width,initial-scale=1" />
 <style>
   :root{
@@ -17,17 +17,49 @@
   label{display:block;margin:8px 0;font-size:0.95rem}
   input[type=text],select,textarea{width:100%;padding:8px;border-radius:8px;border:1px solid #ddd;margin-top:6px}
   textarea{resize:none;overflow:hidden}
-  .row{display:flex;gap:12px;align-items:center;flex-wrap:wrap;margin:8px 0}
+  .row{display:flex;gap:12px;flex-wrap:wrap;margin:8px 0}
   button{background:var(--accent);color:#fff;border:0;padding:10px 14px;border-radius:8px;cursor:pointer}
   button.secondary{background:#999}
   .actions{display:flex;gap:12px;align-items:center}
-  .sig-preview{width:100%;height:60px;border:1px solid #ddd;background:#fff;border-radius:8px;cursor:pointer;display:flex;align-items:center;justify-content:center;color:#aaa;font-size:0.9rem}
-  .sig-preview img{max-width:100%;max-height:100%;object-fit:contain}
+  footer{margin-top:12px;color:var(--muted)}
+  .sig-preview{
+    border:1px solid #ccc;
+    border-radius:8px;
+    width:100%;
+    height:60px;
+    background:#fff;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    cursor:pointer;
+    overflow:hidden;
+  }
+  .sig-preview img{max-width:100%;max-height:100%}
   /* Modal */
-  .modal{position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.7);display:none;align-items:center;justify-content:center;z-index:9999}
-  .modal-content{background:#fff;width:95%;max-width:700px;border-radius:8px;padding:10px;display:flex;flex-direction:column;align-items:center}
-  .modal canvas{width:100%;border:1px solid #ccc;border-radius:8px;background:#fff;touch-action:none}
-  .modal-buttons{margin-top:10px;display:flex;gap:10px}
+  #sigModal{
+    display:none;
+    position:fixed;
+    z-index:9999;
+    left:0;top:0;
+    width:100%;height:100%;
+    background:rgba(0,0,0,0.6);
+    align-items:center;
+    justify-content:center;
+  }
+  #sigModalContent{
+    background:#fff;
+    padding:12px;
+    border-radius:8px;
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    gap:10px;
+  }
+  #sigCanvas{
+    border:1px solid #ccc;
+    border-radius:8px;
+    touch-action:none;
+  }
 </style>
 </head>
 <body>
@@ -38,7 +70,7 @@
 <section class="section">
 <h2>Section 1 — Life Proposed Info</h2>
 <label>Name
-  <input id="LifeProposed_Name" type="text" placeholder="FULL NAME" oninput="this.value=this.value.toUpperCase()">
+  <input id="LifeProposed_Name" type="text" placeholder="FULL NAME">
 </label>
 <label>NRIC
   <input id="LifeProposed_NRIC" type="text" placeholder="e.g. 900101-01-1234">
@@ -51,31 +83,20 @@
 <!-- Section 2 -->
 <section class="section">
 <h2>Section 2 — Details of Amendment</h2>
-<textarea id="Amendment_WriteDetails" placeholder="Describe the amendment in detail..." rows="5" oninput="autoResize(this)"></textarea>
+<textarea id="Amendment_WriteDetails" placeholder="Describe the amendment in detail..." rows="5"></textarea>
 </section>
 
 <!-- Section 3 -->
 <section class="section">
 <h2>Section 3 — Signature & Policy Owner Info</h2>
-
 <label>Signed State</label>
 <select id="Signed_State">
   <option value="">Select State</option>
-  <option>SELANGOR</option>
-  <option>K.LUMPUR</option>
-  <option>MELAKA</option>
-  <option>JOHOR</option>
-  <option>KEDAH</option>
-  <option>KELANTAN</option>
-  <option>NEGERI SEMBILAN</option>
-  <option>PAHANG</option>
-  <option>PENANG</option>
-  <option>PERAK</option>
-  <option>PERLIS</option>
-  <option>SABAH</option>
-  <option>SARAWAK</option>
-  <option>TERENGGANU</option>
-  <option>LABUAN</option>
+  <option>SELANGOR</option><option>K.LUMPUR</option><option>MELAKA</option>
+  <option>JOHOR</option><option>KEDAH</option><option>KELANTAN</option>
+  <option>NEGERI SEMBILAN</option><option>PAHANG</option><option>PENANG</option>
+  <option>PERAK</option><option>PERLIS</option><option>SABAH</option>
+  <option>SARAWAK</option><option>TERENGGANU</option><option>LABUAN</option>
   <option>PUTRAJAYA</option>
 </select>
 
@@ -91,10 +112,20 @@
   </label>
 </div>
 
+<h3>Witness Info</h3>
+<div class="row">
+  <label>Name
+    <input id="Sign_Witness_Name" type="text">
+  </label>
+  <label>NRIC
+    <input id="Sign_Witness_NRIC" type="text">
+  </label>
+</div>
+<div class="sig-preview" onclick="openSig('witness')">
+  <span>Tap to Sign (Witness)</span>
+</div>
+
 <h3>Policy Owner Info</h3>
-<label>
-  <input type="checkbox" id="sameAsLifeProposed" checked> Same as Life Proposed
-</label>
 <div class="row">
   <label>Policy Owner Name
     <input id="Sign_LifeProposedPO_Name" type="text">
@@ -106,21 +137,9 @@
     <input id="Sign_LifeProposedPO_Mobile" type="text">
   </label>
 </div>
-
-<h3>Policy Owner Signature</h3>
-<div class="sig-preview" id="previewPO">Tap to sign</div>
-
-<h3>Witness Info & Signature</h3>
-<div class="row">
-  <label>Name
-    <input id="Sign_Witness_Name" type="text">
-  </label>
-  <label>NRIC
-    <input id="Sign_Witness_NRIC" type="text">
-  </label>
+<div class="sig-preview" onclick="openSig('policyowner')">
+  <span>Tap to Sign (Policy Owner)</span>
 </div>
-<div class="sig-preview" id="previewW">Tap to sign</div>
-
 </section>
 
 <!-- Actions -->
@@ -132,114 +151,146 @@
 <footer><small>Ensure <code>Amendment to Application_LF1042_fillable.pdf</code> is in the same folder as this HTML.</small></footer>
 </main>
 
-<!-- Modal -->
-<div class="modal" id="sigModal" aria-hidden="true">
-  <div class="modal-content">
+<!-- Signature Modal -->
+<div id="sigModal">
+  <div id="sigModalContent">
     <canvas id="sigCanvas"></canvas>
-    <div class="modal-buttons">
-      <button id="doneSig">Done</button>
-      <button id="clearSig" class="secondary">Clear</button>
-      <button id="cancelSig" class="secondary">Cancel</button>
+    <div>
+      <button onclick="saveSig()">Done</button>
+      <button onclick="clearSig()" class="secondary">Clear</button>
+      <button onclick="closeSig()" class="secondary">Cancel</button>
     </div>
   </div>
 </div>
 
 <script src="https://unpkg.com/pdf-lib/dist/pdf-lib.min.js"></script>
 <script>
-function autoResize(t){t.style.height="auto";t.style.height=t.scrollHeight+"px";}
-// Day/month/year population
-(function(){
-  const d=document.getElementById('Signed_Day');
-  for(let i=1;i<=31;i++)d.innerHTML+=`<option>${i}</option>`;
-  const m=document.getElementById('Signed_Month');
-  ["JANUARY","FEBRUARY","MARCH","APRIL","MAY","JUNE","JULY","AUGUST","SEPTEMBER","OCTOBER","NOVEMBER","DECEMBER"].forEach(mm=>m.innerHTML+=`<option>${mm}</option>`);
-  const y=document.getElementById('Signed_Year');
-  const c=new Date().getFullYear();
-  for(let yy=c;yy>=c-5;yy--)y.innerHTML+=`<option>${yy}</option>`;
-})();
-// Same as Life Proposed
-const sameCb=document.getElementById('sameAsLifeProposed'),
-poName=document.getElementById('Sign_LifeProposedPO_Name'),
-poNRIC=document.getElementById('Sign_LifeProposedPO_NRIC'),
-lifeName=document.getElementById('LifeProposed_Name'),
-lifeNRIC=document.getElementById('LifeProposed_NRIC');
-sameCb.addEventListener('change',()=>{
-  if(sameCb.checked){poName.value=lifeName.value;poNRIC.value=lifeNRIC.value;poName.readOnly=true;poNRIC.readOnly=true;}
-  else{poName.readOnly=false;poNRIC.readOnly=false;}
-});
-lifeName.addEventListener('input',()=>{if(sameCb.checked)poName.value=lifeName.value;});
-lifeNRIC.addEventListener('input',()=>{if(sameCb.checked)poNRIC.value=lifeNRIC.value;});
-// Signature modal
-const modal=document.getElementById('sigModal'),canvas=document.getElementById('sigCanvas'),ctx=canvas.getContext('2d');
-let activeId=null,drawing=false;
-const ratios={previewPO:6.40,previewW:6.63}; // exact ratios from PDF
-function resizeCanvas(ratio){
-  const dpr=window.devicePixelRatio||1;
-  const cssWidth=canvas.clientWidth;
-  const cssHeight=cssWidth/ratio;
-  canvas.width=cssWidth*dpr;
-  canvas.height=cssHeight*dpr;
-  canvas.style.height=cssHeight+'px';
-  ctx.setTransform(dpr,0,0,dpr,0,0);
-  ctx.lineWidth=2.5;ctx.lineCap='round';ctx.strokeStyle='#000';
+const sigRatio = 6.63; // shared ratio for both
+const previews = {
+  policyowner: document.querySelectorAll('.sig-preview')[1],
+  witness: document.querySelectorAll('.sig-preview')[0]
+};
+let activeSigField = null;
+const modal = document.getElementById('sigModal');
+const canvas = document.getElementById('sigCanvas');
+const ctx = canvas.getContext('2d');
+let drawing = false;
+
+function resizeCanvas(){
+  const dpr = window.devicePixelRatio || 1;
+  const cssWidth = Math.min(window.innerWidth * 0.95, 900);
+  const cssHeight = cssWidth / sigRatio;
+  canvas.width = cssWidth * dpr;
+  canvas.height = cssHeight * dpr;
+  canvas.style.width = cssWidth + 'px';
+  canvas.style.height = cssHeight + 'px';
+  ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+  ctx.lineWidth = 2.5;
+  ctx.lineCap = 'round';
+  ctx.strokeStyle = '#000';
 }
-function pos(e){const r=canvas.getBoundingClientRect();const x=(e.touches?e.touches[0].clientX:e.clientX)-r.left;const y=(e.touches?e.touches[0].clientY:e.clientY)-r.top;return{x,y};}
-function down(e){drawing=true;ctx.beginPath();const p=pos(e);ctx.moveTo(p.x,p.y);}
-function move(e){if(!drawing)return;const p=pos(e);ctx.lineTo(p.x,p.y);ctx.stroke();}
-function up(){drawing=false;}
-['mousedown','touchstart'].forEach(ev=>canvas.addEventListener(ev,e=>{e.preventDefault();down(e);},{passive:false}));
-['mousemove','touchmove'].forEach(ev=>canvas.addEventListener(ev,e=>{e.preventDefault();move(e);},{passive:false}));
-['mouseup','mouseleave','touchend'].forEach(ev=>canvas.addEventListener(ev,up));
-function openSig(id){
-  activeId=id;modal.style.display='flex';
-  resizeCanvas(ratios[id]);
+
+function openSig(field){
+  activeSigField = field;
+  modal.style.display = 'flex';
+  resizeCanvas();
   ctx.clearRect(0,0,canvas.width,canvas.height);
-  const saved=localStorage.getItem(id+'_sig');
-  if(saved){const img=new Image();img.onload=()=>ctx.drawImage(img,0,0,canvas.width/(window.devicePixelRatio||1),canvas.height/(window.devicePixelRatio||1));img.src=saved;}
+  const saved = localStorage.getItem(field+'_sig');
+  if(saved){
+    const img = new Image();
+    img.src = saved;
+    img.onload = ()=>ctx.drawImage(img,0,0,canvas.width/(window.devicePixelRatio||1),canvas.height/(window.devicePixelRatio||1));
+  }
 }
-function doneSig(){
-  const data=canvas.toDataURL('image/png');
-  localStorage.setItem(activeId+'_sig',data);
-  document.getElementById(activeId).innerHTML=`<img src="${data}">`;
-  closeModal();
+function closeSig(){ modal.style.display = 'none'; }
+function saveSig(){
+  const dataURL = canvas.toDataURL();
+  localStorage.setItem(activeSigField+'_sig', dataURL);
+  previews[activeSigField].innerHTML = `<img src="${dataURL}">`;
+  closeSig();
 }
-function clearSig(){ctx.clearRect(0,0,canvas.width,canvas.height);}
-function closeModal(){modal.style.display='none';activeId=null;}
-document.getElementById('previewPO').onclick=()=>openSig('previewPO');
-document.getElementById('previewW').onclick=()=>openSig('previewW');
-document.getElementById('doneSig').onclick=doneSig;
-document.getElementById('clearSig').onclick=clearSig;
-document.getElementById('cancelSig').onclick=closeModal;
-// Restore previews
-['previewPO','previewW'].forEach(id=>{const s=localStorage.getItem(id+'_sig');if(s)document.getElementById(id).innerHTML=`<img src="${s}">`;});
-// Save text fields
-document.querySelectorAll('input,select,textarea').forEach(el=>{
-  el.addEventListener('input',()=>localStorage.setItem(el.id,el.value));
-  const s=localStorage.getItem(el.id);if(s)el.value=s;
+function clearSig(){
+  ctx.clearRect(0,0,canvas.width,canvas.height);
+  localStorage.removeItem(activeSigField+'_sig');
+  previews[activeSigField].innerHTML = `<span>Tap to Sign (${activeSigField==='witness'?'Witness':'Policy Owner'})</span>`;
+}
+
+// Drawing events
+canvas.addEventListener('mousedown', e=>{drawing=true;ctx.beginPath();ctx.moveTo(e.offsetX,e.offsetY);});
+canvas.addEventListener('mousemove', e=>{if(!drawing)return;ctx.lineTo(e.offsetX,e.offsetY);ctx.stroke();});
+canvas.addEventListener('mouseup', ()=>drawing=false);
+canvas.addEventListener('mouseleave', ()=>drawing=false);
+canvas.addEventListener('touchstart', e=>{
+  e.preventDefault();
+  const t=e.touches[0],rect=canvas.getBoundingClientRect();
+  ctx.beginPath();
+  ctx.moveTo(t.clientX-rect.left,t.clientY-rect.top);
+  drawing=true;
+},{passive:false});
+canvas.addEventListener('touchmove', e=>{
+  e.preventDefault();
+  if(!drawing)return;
+  const t=e.touches[0],rect=canvas.getBoundingClientRect();
+  ctx.lineTo(t.clientX-rect.left,t.clientY-rect.top);
+  ctx.stroke();
+},{passive:false});
+canvas.addEventListener('touchend', ()=>drawing=false);
+
+// Populate Day/Month/Year
+(function(){
+  const daySel=document.getElementById('Signed_Day');
+  for(let i=1;i<=31;i++){daySel.innerHTML+=`<option>${i}</option>`;}
+  const monthSel=document.getElementById('Signed_Month');
+  const months=["JANUARY","FEBRUARY","MARCH","APRIL","MAY","JUNE","JULY","AUGUST","SEPTEMBER","OCTOBER","NOVEMBER","DECEMBER"];
+  months.forEach(m=>monthSel.innerHTML+=`<option>${m}</option>`);
+  const yearSel=document.getElementById('Signed_Year');
+  const current=new Date().getFullYear();
+  for(let y=current;y>=current+5;y--){yearSel.innerHTML+=`<option>${y}</option>`;}
+})();
+
+// LocalStorage for text inputs
+document.querySelectorAll("input,select,textarea").forEach(el=>{
+  el.addEventListener("input",()=>localStorage.setItem(el.id,el.value));
+  const saved=localStorage.getItem(el.id);if(saved)el.value=saved;
 });
-// PDF gen
+
+// Fill PDF
 async function fillPDF(){
-  const res=await fetch('Amendment to Application_LF1042_fillable.pdf');
+  const res=await fetch("Amendment to Application_LF1042_fillable.pdf");
   const bytes=await res.arrayBuffer();
   const pdfDoc=await PDFLib.PDFDocument.load(bytes);
   const form=pdfDoc.getForm();
   function set(id){try{form.getTextField(id).setText(document.getElementById(id).value||"");}catch(e){}}
-  ['PolicyNo','Amendment_WriteDetails','Signed_Day','Signed_Month','Signed_Year','Sign_Witness_Name','Sign_Witness_NRIC','Sign_LifeProposedPO_Name','Sign_LifeProposedPO_NRIC','Sign_LifeProposedPO_Mobile','LifeProposed_NRIC','LifeProposed_Name','Signed_State'].forEach(set);
-  const page=pdfDoc.getPages()[0];
-  async function addSig(id,x,y,w,h){
-    const s=localStorage.getItem(id+'_sig');if(!s)return;
-    const png=await pdfDoc.embedPng(await fetch(s).then(r=>r.arrayBuffer()));
-    page.drawImage(png,{x,y,width:w,height:h});
+  set("LifeProposed_Name");set("LifeProposed_NRIC");set("PolicyNo");
+  set("Amendment_WriteDetails");
+  set("Signed_Day");set("Signed_Month");set("Signed_Year");
+  set("Signed_State");set("Sign_Witness_Name");set("Sign_Witness_NRIC");
+  set("Sign_LifeProposedPO_Name");set("Sign_LifeProposedPO_NRIC");set("Sign_LifeProposedPO_Mobile");
+
+  const pages=pdfDoc.getPages();
+  const page=pages[0];
+  const sigWidth=242.04, sigHeight=36.51;
+  const poSig=localStorage.getItem('policyowner_sig');
+  const wSig=localStorage.getItem('witness_sig');
+  if(poSig){
+    const png=await pdfDoc.embedPng(await fetch(poSig).then(r=>r.arrayBuffer()));
+    page.drawImage(png,{x:350,y:150,width:sigWidth,height:sigHeight});
   }
-  await addSig('previewPO',317.4,144.52,242.04,37.81);
-  await addSig('previewW',29.04,145.83,242.04,36.51);
+  if(wSig){
+    const png=await pdfDoc.embedPng(await fetch(wSig).then(r=>r.arrayBuffer()));
+    page.drawImage(png,{x:150,y:150,width:sigWidth,height:sigHeight});
+  }
   const pdfBytes=await pdfDoc.save();
-  const blob=new Blob([pdfBytes],{type:'application/pdf'});
+  const blob=new Blob([pdfBytes],{type:"application/pdf"});
   const url=URL.createObjectURL(blob);
-  const a=document.createElement('a');a.href=url;a.download='Filled_LF1042.pdf';a.click();URL.revokeObjectURL(url);
+  const a=document.createElement("a");
+  a.href=url;a.download="Filled_LF1042.pdf";a.click();
+  URL.revokeObjectURL(url);
 }
-document.getElementById('generate').onclick=fillPDF;
-document.getElementById('resetAll').onclick=()=>{if(confirm('Clear all data?')){localStorage.clear();location.reload();}};
+document.getElementById("generate").addEventListener("click",fillPDF);
+document.getElementById("resetAll").addEventListener("click",()=>{
+  localStorage.clear();location.reload();
+});
 </script>
 </body>
 </html>
