@@ -125,6 +125,10 @@
   <span>Tap to Sign (Witness)</span>
 </div>
 
+<label style="margin-top:12px; display:block;">
+  <input type="checkbox" id="SameAsLifeProposed" /> Life Proposed is Policy Owner
+</label>  
+  
 <h3>Policy Owner Info</h3>
 <div class="row">
   <label>Policy Owner Name
@@ -290,6 +294,31 @@ async function fillPDF(){
 document.getElementById("generate").addEventListener("click",fillPDF);
 document.getElementById("resetAll").addEventListener("click",()=>{
   localStorage.clear();location.reload();
+});
+
+const checkbox = document.getElementById('SameAsLifeProposed');
+
+function copyLifeProposedToPolicyOwner(){
+  if(checkbox.checked){
+    document.getElementById('Sign_LifeProposedPO_Name').value = document.getElementById('LifeProposed_Name').value;
+    document.getElementById('Sign_LifeProposedPO_NRIC').value = document.getElementById('LifeProposed_NRIC').value;
+  } else {
+    document.getElementById('Sign_LifeProposedPO_Name').value = '';
+    document.getElementById('Sign_LifeProposedPO_NRIC').value = '';
+  }
+}
+
+checkbox.addEventListener('change', copyLifeProposedToPolicyOwner);
+
+document.getElementById('LifeProposed_Name').addEventListener('input', () => {
+  if(checkbox.checked){
+    document.getElementById('Sign_LifeProposedPO_Name').value = document.getElementById('LifeProposed_Name').value;
+  }
+});
+document.getElementById('LifeProposed_NRIC').addEventListener('input', () => {
+  if(checkbox.checked){
+    document.getElementById('Sign_LifeProposedPO_NRIC').value = document.getElementById('LifeProposed_NRIC').value;
+  }
 });
 </script>
 </body>
