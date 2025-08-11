@@ -151,35 +151,34 @@
 <footer><small>Ensure <code>Amendment to Application_LF1042_fillable.pdf</code> is in the same folder as this HTML.</small></footer>
 </main>
 
-<!-- Signature Modal -->
-<div id="sigModal">
-  <div id="sigModalContent">
-    <canvas id="sigCanvas"></canvas>
-    <div>
-      <button onclick="saveSig()">Done</button>
-      <button onclick="clearSig()" class="secondary">Clear</button>
-      <button onclick="closeSig()" class="secondary">Cancel</button>
-    </div>
+<!-- Signature Modal (Fullscreen) -->
+<div id="sigModal" style="display:none;position:fixed;z-index:9999;left:0;top:0;width:100%;height:100%;background:#fff;flex-direction:column;">
+  <div style="flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:10px;">
+    <canvas id="sigCanvas" style="border:1px solid #ccc;border-radius:8px;width:100%;height:100%;touch-action:none;"></canvas>
+  </div>
+  <div style="padding:10px;display:flex;gap:10px;justify-content:center;">
+    <button onclick="saveSig()">Done</button>
+    <button onclick="clearSig()" class="secondary">Clear</button>
+    <button onclick="closeSig()" class="secondary">Cancel</button>
   </div>
 </div>
 
 <script src="https://unpkg.com/pdf-lib/dist/pdf-lib.min.js"></script>
 <script>
-const sigRatio = 6.63; // shared ratio for both
+let activeSigField = null;
 const previews = {
   policyowner: document.querySelectorAll('.sig-preview')[1],
   witness: document.querySelectorAll('.sig-preview')[0]
 };
-let activeSigField = null;
 const modal = document.getElementById('sigModal');
 const canvas = document.getElementById('sigCanvas');
 const ctx = canvas.getContext('2d');
 let drawing = false;
 
-function resizeCanvas(){
+function resizeCanvasFullscreen(){
   const dpr = window.devicePixelRatio || 1;
-  const cssWidth = Math.min(window.innerWidth * 0.95, 900);
-  const cssHeight = cssWidth / sigRatio;
+  const cssWidth = window.innerWidth;
+  const cssHeight = window.innerHeight - 60; // leave space for buttons
   canvas.width = cssWidth * dpr;
   canvas.height = cssHeight * dpr;
   canvas.style.width = cssWidth + 'px';
@@ -193,7 +192,7 @@ function resizeCanvas(){
 function openSig(field){
   activeSigField = field;
   modal.style.display = 'flex';
-  resizeCanvas();
+  resizeCanvasFullscreen();
   ctx.clearRect(0,0,canvas.width,canvas.height);
   const saved = localStorage.getItem(field+'_sig');
   if(saved){
@@ -215,7 +214,7 @@ function clearSig(){
   previews[activeSigField].innerHTML = `<span>Tap to Sign (${activeSigField==='witness'?'Witness':'Policy Owner'})</span>`;
 }
 
-// Drawing events
+// Drawing handlers
 canvas.addEventListener('mousedown', e=>{drawing=true;ctx.beginPath();ctx.moveTo(e.offsetX,e.offsetY);});
 canvas.addEventListener('mousemove', e=>{if(!drawing)return;ctx.lineTo(e.offsetX,e.offsetY);ctx.stroke();});
 canvas.addEventListener('mouseup', ()=>drawing=false);
@@ -245,7 +244,7 @@ canvas.addEventListener('touchend', ()=>drawing=false);
   months.forEach(m=>monthSel.innerHTML+=`<option>${m}</option>`);
   const yearSel=document.getElementById('Signed_Year');
   const current=new Date().getFullYear();
-  for(let y=current;y>=current+5;y--){yearSel.innerHTML+=`<option>${y}</option>`;}
+  for(let y=current;y>=current-5;y--){yearSel.innerHTML+=`<option>${y}</option>`;}
 })();
 
 // LocalStorage for text inputs
