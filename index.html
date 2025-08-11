@@ -21,7 +21,7 @@
   button{background:var(--accent);color:#fff;border:0;padding:10px 14px;border-radius:8px;cursor:pointer}
   button.secondary{background:#999}
   .actions{display:flex;gap:12px;align-items:center}
-  canvas{width:100%;height:150px;border-radius:8px;border:1px solid #ddd;background:#fff}
+  canvas{width:100%;border-radius:8px;border:1px solid #ddd;background:#fff}
   footer{margin-top:12px;color:var(--muted)}
 </style>
 </head>
@@ -166,14 +166,15 @@ sameCb.addEventListener('change',()=>{
 lifeName.addEventListener('input',()=>{if(sameCb.checked)poName.value=lifeName.value;});
 lifeNRIC.addEventListener('input',()=>{if(sameCb.checked)poNRIC.value=lifeNRIC.value;});
 
-// Signature setup with preserve-on-resize
+// Signature setup with preserved drawing + matching PDF ratio
 function setupCanvas(id,clearId){
   const c=document.getElementById(id),ctx=c.getContext("2d");
   function resize(){
     const dataUrl = c.toDataURL(); // save before resize
     const ratio=window.devicePixelRatio||1;
+    const targetRatio = (id === "sigPolicyOwner") ? (37.81/242.04) : (36.51/242.04);
     c.width=c.offsetWidth*ratio;
-    c.height=150*ratio;
+    c.height=c.offsetWidth*targetRatio*ratio;
     ctx.setTransform(1,0,0,1,0,0);
     ctx.scale(ratio,ratio);
     ctx.lineWidth=2;
@@ -230,7 +231,6 @@ async function fillPDF(){
   const pages=pdfDoc.getPages();
   const page=pages[0];
 
-  // Updated: scale signatures exactly to box size
   async function addSignature(canvas,x,y,w,h){
     if(canvas.toDataURL().length>100){
       const pngBytes=await fetch(canvas.toDataURL("image/png")).then(r=>r.arrayBuffer());
@@ -239,9 +239,8 @@ async function fillPDF(){
     }
   }
 
-  // Exact positions from PDF measurement
-  await addSignature(sigPO.canvas, 317.4, 144.52, 242.04, 37.81); // Policy Owner
-  await addSignature(sigW.canvas, 29.04, 145.83, 242.04, 36.51);  // Witness
+  await addSignature(sigPO.canvas, 317.4, 144.52, 242.04, 37.81);
+  await addSignature(sigW.canvas, 29.04, 145.83, 242.04, 36.51);
 
   const pdfBytes=await pdfDoc.save();
   const blob=new Blob([pdfBytes],{type:"application/pdf"});
