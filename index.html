@@ -21,7 +21,7 @@
   button{background:var(--accent);color:#fff;border:0;padding:10px 14px;border-radius:8px;cursor:pointer}
   button.secondary{background:#999}
   .actions{display:flex;gap:12px;align-items:center}
-  canvas{width:100%;height:150px;border-radius:8px;border:1px solid #ddd;background:#fff}
+  canvas{width:100%;border-radius:8px;border:1px solid #ddd;background:#fff}
   footer{margin-top:12px;color:var(--muted)}
 </style>
 </head>
@@ -86,16 +86,6 @@
   </label>
 </div>
 
-<h3>Witness Info</h3>
-<div class="row">
-  <label>Name
-    <input id="Sign_Witness_Name" type="text">
-  </label>
-  <label>NRIC
-    <input id="Sign_Witness_NRIC" type="text">
-  </label>
-</div>
-
 <h3>Policy Owner Info</h3>
 <label>
   <input type="checkbox" id="sameAsLifeProposed" checked> Same as Life Proposed
@@ -118,11 +108,20 @@
   <button type="button" id="clearSigPolicyOwner" class="secondary">Clear Signature</button>
 </div>
 
-<h3>Witness Signature</h3>
+<h3>Witness Info & Signature</h3>
+<div class="row">
+  <label>Name
+    <input id="Sign_Witness_Name" type="text">
+  </label>
+  <label>NRIC
+    <input id="Sign_Witness_NRIC" type="text">
+  </label>
+</div>
 <canvas id="sigWitness"></canvas>
 <div class="row">
   <button type="button" id="clearSigWitness" class="secondary">Clear Signature</button>
 </div>
+
 </section>
 
 <!-- Actions -->
@@ -156,7 +155,7 @@ const sameCb=document.getElementById('sameAsLifeProposed');
 const poName=document.getElementById('Sign_LifeProposedPO_Name');
 const poNRIC=document.getElementById('Sign_LifeProposedPO_NRIC');
 const lifeName=document.getElementById('LifeProposed_Name');
-const lifeNRIC=document.getElementById('Lifeproposed_NRIC');
+const lifeNRIC=document.getElementById('LifeProposed_NRIC');
 sameCb.addEventListener('change',()=>{
   if(sameCb.checked){
     poName.value=lifeName.value;
@@ -167,16 +166,29 @@ sameCb.addEventListener('change',()=>{
 lifeName.addEventListener('input',()=>{if(sameCb.checked)poName.value=lifeName.value;});
 lifeNRIC.addEventListener('input',()=>{if(sameCb.checked)poNRIC.value=lifeNRIC.value;});
 
-// Signature setup
+// Signature setup with preserved drawing + comfort factor
 function setupCanvas(id,clearId){
   const c=document.getElementById(id),ctx=c.getContext("2d");
   function resize(){
+    const dataUrl = c.toDataURL(); // save before resize
     const ratio=window.devicePixelRatio||1;
-    c.width=c.offsetWidth*ratio;c.height=150*ratio;
-    ctx.setTransform(1,0,0,1,0,0);ctx.scale(ratio,ratio);
-    ctx.lineWidth=2;ctx.lineCap="round";ctx.strokeStyle="#000";
+    const targetRatio = (id === "sigPolicyOwner") ? (37.81/242.04) : (36.51/242.04);
+    const comfortFactor = 2; // Bigger box for finger signing
+    c.width=c.offsetWidth*ratio;
+    c.height=c.offsetWidth*targetRatio*comfortFactor*ratio;
+    ctx.setTransform(1,0,0,1,0,0);
+    ctx.scale(ratio,ratio);
+    ctx.lineWidth=2;
+    ctx.lineCap="round";
+    ctx.strokeStyle="#000";
+    if(dataUrl.length>100){
+      const img=new Image();
+      img.src=dataUrl;
+      img.onload=()=>ctx.drawImage(img,0,0,c.width/ratio,c.height/ratio);
+    }
   }
-  resize();window.addEventListener("resize",resize);
+  resize();
+  window.addEventListener("resize",resize);
   let draw=false;
   function pos(e){const r=c.getBoundingClientRect();const x=(e.touches?e.touches[0].clientX:e.clientX)-r.left;const y=(e.touches?e.touches[0].clientY:e.clientY)-r.top;return{x,y};}
   c.addEventListener("mousedown",e=>{draw=true;ctx.beginPath();ctx.moveTo(pos(e).x,pos(e).y);});
@@ -196,6 +208,7 @@ document.querySelectorAll("input,select,textarea").forEach(el=>{
   el.addEventListener("input",()=>localStorage.setItem(el.id,el.value));
   const saved=localStorage.getItem(el.id);if(saved)el.value=saved;
 });
+document.querySelectorAll("textarea").forEach(t=>autoResize(t));
 
 // Fill PDF
 async function fillPDF(){
@@ -203,31 +216,32 @@ async function fillPDF(){
   const bytes=await res.arrayBuffer();
   const pdfDoc=await PDFLib.PDFDocument.load(bytes);
   const form=pdfDoc.getForm();
-  function set(id){try{form.getTextField(id).setText(document.getElementById(id).value||"");}catch(e){}}
-  set("LifeProposed_Name");
-  set("LifeProposed_NRIC");
-  set("PolicyNo");
-  set("Amendment_WriteDetails");
-  set("Signed_Day");
-  set("Signed_Month");
-  set("Signed_Year");
-  set("Signed_State");
-  set("Sign_Witness_Name");
-  set("Sign_Witness_NRIC");
-  set("Sign_LifeProposedPO_Name");
-  set("Sign_LifeProposedPO_NRIC");
-  set("Sign_LifeProposedPO_Mobile");
+  
+  function setField(id){
+    const el=document.getElementById(id);
+    if(!el) return;
+    try{form.getTextField(id).setText(el.value||"");}
+    catch(e){console.warn("Missing field:",id);}
+  }
+
+  ["PolicyNo","Amendment_WriteDetails","Signed_Day","Signed_Month","Signed_Year",
+   "Sign_Witness_Name","Sign_Witness_NRIC","Sign_LifeProposedPO_Name",
+   "Sign_LifeProposedPO_NRIC","Sign_LifeProposedPO_Mobile",
+   "LifeProposed_NRIC","LifeProposed_Name","Signed_State"].forEach(setField);
 
   const pages=pdfDoc.getPages();
   const page=pages[0];
-  if(sigPO.canvas.toDataURL().length>100){
-    const png=await pdfDoc.embedPng(await fetch(sigPO.canvas.toDataURL()).then(r=>r.arrayBuffer()));
-    page.drawImage(png,{x:350,y:150,width:160,height:50}); // approx coords
+
+  async function addSignature(canvas,x,y,w,h){
+    if(canvas.toDataURL().length>100){
+      const pngBytes=await fetch(canvas.toDataURL("image/png")).then(r=>r.arrayBuffer());
+      const png=await pdfDoc.embedPng(pngBytes);
+      page.drawImage(png,{x,y,width:w,height:h});
+    }
   }
-  if(sigW.canvas.toDataURL().length>100){
-    const png=await pdfDoc.embedPng(await fetch(sigW.canvas.toDataURL()).then(r=>r.arrayBuffer()));
-    page.drawImage(png,{x:150,y:150,width:160,height:50}); // approx coords
-  }
+
+  await addSignature(sigPO.canvas, 317.4, 144.52, 242.04, 37.81);
+  await addSignature(sigW.canvas, 29.04, 145.83, 242.04, 36.51);
 
   const pdfBytes=await pdfDoc.save();
   const blob=new Blob([pdfBytes],{type:"application/pdf"});
@@ -239,7 +253,10 @@ async function fillPDF(){
 
 document.getElementById("generate").addEventListener("click",fillPDF);
 document.getElementById("resetAll").addEventListener("click",()=>{
-  localStorage.clear();location.reload();
+  if(confirm("Clear all saved form data?")){
+    localStorage.clear();
+    location.reload();
+  }
 });
 </script>
 </body>
