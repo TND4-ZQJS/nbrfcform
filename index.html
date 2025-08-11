@@ -26,11 +26,8 @@
   /* Modal */
   .modal{position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.7);display:none;align-items:center;justify-content:center;z-index:9999}
   .modal-content{background:#fff;width:95%;max-width:700px;border-radius:8px;padding:10px;display:flex;flex-direction:column;align-items:center}
-  .modal canvas{width:100%;height:320px;border:1px solid #ccc;border-radius:8px;background:#fff;touch-action:none}
+  .modal canvas{width:100%;border:1px solid #ccc;border-radius:8px;background:#fff;touch-action:none}
   .modal-buttons{margin-top:10px;display:flex;gap:10px}
-  @media (min-width:720px){
-    .modal canvas{height:360px}
-  }
 </style>
 </head>
 <body>
@@ -149,221 +146,100 @@
 
 <script src="https://unpkg.com/pdf-lib/dist/pdf-lib.min.js"></script>
 <script>
-// ----------------- small helpers -----------------
 function autoResize(t){t.style.height="auto";t.style.height=t.scrollHeight+"px";}
-function setHTML(elid, html){document.getElementById(elid).innerHTML = html;}
-function getHTML(elid){ return document.getElementById(elid); }
-
-// Populate day/month/year
+// Day/month/year population
 (function(){
-  const daySel=document.getElementById('Signed_Day');
-  for(let i=1;i<=31;i++){daySel.innerHTML+=`<option>${i}</option>`;}
-  const monthSel=document.getElementById('Signed_Month');
-  const months=["JANUARY","FEBRUARY","MARCH","APRIL","MAY","JUNE","JULY","AUGUST","SEPTEMBER","OCTOBER","NOVEMBER","DECEMBER"];
-  months.forEach(m=>monthSel.innerHTML+=`<option>${m}</option>`);
-  const yearSel=document.getElementById('Signed_Year');
-  const current=new Date().getFullYear();
-  for(let y=current;y>=current-5;y--){yearSel.innerHTML+=`<option>${y}</option>`;}
+  const d=document.getElementById('Signed_Day');
+  for(let i=1;i<=31;i++)d.innerHTML+=`<option>${i}</option>`;
+  const m=document.getElementById('Signed_Month');
+  ["JANUARY","FEBRUARY","MARCH","APRIL","MAY","JUNE","JULY","AUGUST","SEPTEMBER","OCTOBER","NOVEMBER","DECEMBER"].forEach(mm=>m.innerHTML+=`<option>${mm}</option>`);
+  const y=document.getElementById('Signed_Year');
+  const c=new Date().getFullYear();
+  for(let yy=c;yy>=c-5;yy--)y.innerHTML+=`<option>${yy}</option>`;
 })();
-
-// Same as Life Proposed toggle
-const sameCb=document.getElementById('sameAsLifeProposed');
-const poName=document.getElementById('Sign_LifeProposedPO_Name');
-const poNRIC=document.getElementById('Sign_LifeProposedPO_NRIC');
-const lifeName=document.getElementById('LifeProposed_Name');
-const lifeNRIC=document.getElementById('LifeProposed_NRIC');
+// Same as Life Proposed
+const sameCb=document.getElementById('sameAsLifeProposed'),
+poName=document.getElementById('Sign_LifeProposedPO_Name'),
+poNRIC=document.getElementById('Sign_LifeProposedPO_NRIC'),
+lifeName=document.getElementById('LifeProposed_Name'),
+lifeNRIC=document.getElementById('LifeProposed_NRIC');
 sameCb.addEventListener('change',()=>{
-  if(sameCb.checked){
-    poName.value=lifeName.value;
-    poNRIC.value=lifeNRIC.value;
-    poName.readOnly=true;poNRIC.readOnly=true;
-  } else {poName.readOnly=false;poNRIC.readOnly=false;}
+  if(sameCb.checked){poName.value=lifeName.value;poNRIC.value=lifeNRIC.value;poName.readOnly=true;poNRIC.readOnly=true;}
+  else{poName.readOnly=false;poNRIC.readOnly=false;}
 });
 lifeName.addEventListener('input',()=>{if(sameCb.checked)poName.value=lifeName.value;});
 lifeNRIC.addEventListener('input',()=>{if(sameCb.checked)poNRIC.value=lifeNRIC.value;});
-
-// ----------------- signature modal & canvas -----------------
-const modal = document.getElementById('sigModal');
-const canvas = document.getElementById('sigCanvas');
-const ctx = canvas.getContext('2d');
-let activePreviewId = null;
-let drawing = false;
-
-// Modal canvas desired CSS height (px) and comfort factor behavior
-const modalCssHeight = 320; // visible height inside modal in CSS pixels
-
-function resizeSigCanvas(){
-  const dpr = window.devicePixelRatio || 1;
-  const cssWidth = canvas.clientWidth; // CSS pixels width
-  const cssHeight = modalCssHeight;    // CSS pixels height
-  // Set actual pixel size
-  canvas.width = Math.round(cssWidth * dpr);
-  canvas.height = Math.round(cssHeight * dpr);
-  // Make sure DOM size remains CSS size
-  canvas.style.width = cssWidth + 'px';
-  canvas.style.height = cssHeight + 'px';
-  // Reset transform so coordinates are in CSS pixels
-  ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
-  ctx.lineWidth = 2.5; // CSS px thickness (adjust if you want thicker pen)
-  ctx.lineCap = 'round';
-  ctx.strokeStyle = '#000';
+// Signature modal
+const modal=document.getElementById('sigModal'),canvas=document.getElementById('sigCanvas'),ctx=canvas.getContext('2d');
+let activeId=null,drawing=false;
+const ratios={previewPO:6.40,previewW:6.63}; // exact ratios from PDF
+function resizeCanvas(ratio){
+  const dpr=window.devicePixelRatio||1;
+  const cssWidth=canvas.clientWidth;
+  const cssHeight=cssWidth/ratio;
+  canvas.width=cssWidth*dpr;
+  canvas.height=cssHeight*dpr;
+  canvas.style.height=cssHeight+'px';
+  ctx.setTransform(dpr,0,0,dpr,0,0);
+  ctx.lineWidth=2.5;ctx.lineCap='round';ctx.strokeStyle='#000';
 }
-
-// Convert event to local (CSS pixels) coordinates
-function pos(e){
-  const r = canvas.getBoundingClientRect();
-  const clientX = (e.touches ? e.touches[0].clientX : e.clientX);
-  const clientY = (e.touches ? e.touches[0].clientY : e.clientY);
-  return { x: clientX - r.left, y: clientY - r.top };
+function pos(e){const r=canvas.getBoundingClientRect();const x=(e.touches?e.touches[0].clientX:e.clientX)-r.left;const y=(e.touches?e.touches[0].clientY:e.clientY)-r.top;return{x,y};}
+function down(e){drawing=true;ctx.beginPath();const p=pos(e);ctx.moveTo(p.x,p.y);}
+function move(e){if(!drawing)return;const p=pos(e);ctx.lineTo(p.x,p.y);ctx.stroke();}
+function up(){drawing=false;}
+['mousedown','touchstart'].forEach(ev=>canvas.addEventListener(ev,e=>{e.preventDefault();down(e);},{passive:false}));
+['mousemove','touchmove'].forEach(ev=>canvas.addEventListener(ev,e=>{e.preventDefault();move(e);},{passive:false}));
+['mouseup','mouseleave','touchend'].forEach(ev=>canvas.addEventListener(ev,up));
+function openSig(id){
+  activeId=id;modal.style.display='flex';
+  resizeCanvas(ratios[id]);
+  ctx.clearRect(0,0,canvas.width,canvas.height);
+  const saved=localStorage.getItem(id+'_sig');
+  if(saved){const img=new Image();img.onload=()=>ctx.drawImage(img,0,0,canvas.width/(window.devicePixelRatio||1),canvas.height/(window.devicePixelRatio||1));img.src=saved;}
 }
-
-// Start / move / end handlers
-function pointerDown(e){ drawing = true; ctx.beginPath(); const p = pos(e); ctx.moveTo(p.x, p.y); }
-function pointerMove(e){ if(!drawing) return; const p = pos(e); ctx.lineTo(p.x, p.y); ctx.stroke(); }
-function pointerUp(e){ drawing = false; }
-
-// Attach pointer listeners (works for mouse + touch)
-canvas.addEventListener('mousedown', pointerDown);
-canvas.addEventListener('mousemove', pointerMove);
-canvas.addEventListener('mouseup', pointerUp);
-canvas.addEventListener('mouseleave', pointerUp);
-canvas.addEventListener('touchstart', (e)=>{ e.preventDefault(); pointerDown(e); }, {passive:false});
-canvas.addEventListener('touchmove', (e)=>{ e.preventDefault(); pointerMove(e); }, {passive:false});
-canvas.addEventListener('touchend', (e)=>{ e.preventDefault(); pointerUp(e); }, {passive:false});
-
-// Open modal and load saved image if any
-function openSig(previewId){
-  activePreviewId = previewId;
-  modal.style.display = 'flex';
-  modal.setAttribute('aria-hidden', 'false');
-  // resize AFTER visible so clientWidth is correct
-  resizeSigCanvas();
-  // clear canvas content in CSS coordinate space
-  const dpr = window.devicePixelRatio || 1;
-  ctx.clearRect(0,0, canvas.width / dpr, canvas.height / dpr);
-  // load saved image (if any)
-  const saved = localStorage.getItem(previewId + '_sig');
-  if(saved){
-    const img = new Image();
-    img.onload = function(){
-      // draw using CSS pixels (ctx is transformed to map CSS->device)
-      ctx.drawImage(img, 0, 0, canvas.width / dpr, canvas.height / dpr);
-    };
-    img.src = saved;
-  }
-}
-
-// Done: save and preview
 function doneSig(){
-  const dataUrl = canvas.toDataURL('image/png');
-  if(!activePreviewId) return;
-  localStorage.setItem(activePreviewId + '_sig', dataUrl);
-  // show preview image
-  const preview = document.getElementById(activePreviewId);
-  preview.innerHTML = `<img src="${dataUrl}" alt="signature">`;
+  const data=canvas.toDataURL('image/png');
+  localStorage.setItem(activeId+'_sig',data);
+  document.getElementById(activeId).innerHTML=`<img src="${data}">`;
   closeModal();
 }
-
-// Clear canvas
-function clearSig(){
-  const dpr = window.devicePixelRatio || 1;
-  ctx.clearRect(0,0, canvas.width / dpr, canvas.height / dpr);
-}
-
-// Cancel
-function closeModal(){
-  modal.style.display = 'none';
-  modal.setAttribute('aria-hidden', 'true');
-  activePreviewId = null;
-}
-
-// open preview click handlers
-document.getElementById('previewPO').addEventListener('click', ()=> openSig('previewPO'));
-document.getElementById('previewW').addEventListener('click', ()=> openSig('previewW'));
-
-// modal buttons
-document.getElementById('doneSig').addEventListener('click', doneSig);
-document.getElementById('clearSig').addEventListener('click', clearSig);
-document.getElementById('cancelSig').addEventListener('click', closeModal);
-
-// when window resizes while modal open, resize canvas and redraw saved image (if any)
-window.addEventListener('resize', ()=>{
-  if(modal.style.display === 'flex' && activePreviewId){
-    const saved = localStorage.getItem(activePreviewId + '_sig');
-    resizeSigCanvas();
-    const dpr = window.devicePixelRatio || 1;
-    ctx.clearRect(0,0, canvas.width / dpr, canvas.height / dpr);
-    if(saved){
-      const img = new Image();
-      img.onload = ()=> ctx.drawImage(img,0,0, canvas.width / dpr, canvas.height / dpr);
-      img.src = saved;
-    }
-  }
-});
-
-// Load previews from storage on startup
-['previewPO','previewW'].forEach(id=>{
-  const saved = localStorage.getItem(id + '_sig');
-  if(saved) document.getElementById(id).innerHTML = `<img src="${saved}" alt="signature">`;
-});
-
-// ----------------- LocalStorage for text fields -----------------
+function clearSig(){ctx.clearRect(0,0,canvas.width,canvas.height);}
+function closeModal(){modal.style.display='none';activeId=null;}
+document.getElementById('previewPO').onclick=()=>openSig('previewPO');
+document.getElementById('previewW').onclick=()=>openSig('previewW');
+document.getElementById('doneSig').onclick=doneSig;
+document.getElementById('clearSig').onclick=clearSig;
+document.getElementById('cancelSig').onclick=closeModal;
+// Restore previews
+['previewPO','previewW'].forEach(id=>{const s=localStorage.getItem(id+'_sig');if(s)document.getElementById(id).innerHTML=`<img src="${s}">`;});
+// Save text fields
 document.querySelectorAll('input,select,textarea').forEach(el=>{
-  el.addEventListener('input', ()=> localStorage.setItem(el.id, el.value));
-  const saved = localStorage.getItem(el.id);
-  if(saved) el.value = saved;
+  el.addEventListener('input',()=>localStorage.setItem(el.id,el.value));
+  const s=localStorage.getItem(el.id);if(s)el.value=s;
 });
-document.querySelectorAll('textarea').forEach(t => autoResize(t));
-
-// ----------------- PDF generation -----------------
+// PDF gen
 async function fillPDF(){
-  const res = await fetch('Amendment to Application_LF1042_fillable.pdf');
-  const bytes = await res.arrayBuffer();
-  const pdfDoc = await PDFLib.PDFDocument.load(bytes);
-  const form = pdfDoc.getForm();
-
-  function setField(id){
-    const el = document.getElementById(id);
-    if(!el) return;
-    try{ form.getTextField(id).setText(el.value || ''); } catch(e){ console.warn('PDF field missing', id); }
+  const res=await fetch('Amendment to Application_LF1042_fillable.pdf');
+  const bytes=await res.arrayBuffer();
+  const pdfDoc=await PDFLib.PDFDocument.load(bytes);
+  const form=pdfDoc.getForm();
+  function set(id){try{form.getTextField(id).setText(document.getElementById(id).value||"");}catch(e){}}
+  ['PolicyNo','Amendment_WriteDetails','Signed_Day','Signed_Month','Signed_Year','Sign_Witness_Name','Sign_Witness_NRIC','Sign_LifeProposedPO_Name','Sign_LifeProposedPO_NRIC','Sign_LifeProposedPO_Mobile','LifeProposed_NRIC','LifeProposed_Name','Signed_State'].forEach(set);
+  const page=pdfDoc.getPages()[0];
+  async function addSig(id,x,y,w,h){
+    const s=localStorage.getItem(id+'_sig');if(!s)return;
+    const png=await pdfDoc.embedPng(await fetch(s).then(r=>r.arrayBuffer()));
+    page.drawImage(png,{x,y,width:w,height:h});
   }
-
-  ['PolicyNo','Amendment_WriteDetails','Signed_Day','Signed_Month','Signed_Year',
-   'Sign_Witness_Name','Sign_Witness_NRIC','Sign_LifeProposedPO_Name',
-   'Sign_LifeProposedPO_NRIC','Sign_LifeProposedPO_Mobile',
-   'LifeProposed_NRIC','LifeProposed_Name','Signed_State'].forEach(setField);
-
-  const pages = pdfDoc.getPages();
-  const page = pages[0];
-
-  async function addSignatureFromKey(key, x, y, w, h){
-    const saved = localStorage.getItem(key + '_sig');
-    if(!saved) return;
-    const pngBytes = await fetch(saved).then(r=>r.arrayBuffer());
-    const png = await pdfDoc.embedPng(pngBytes);
-    // draw scaled into exact box
-    page.drawImage(png, { x, y, width: w, height: h });
-  }
-
-  // exact coordinates from earlier measurement
-  await addSignatureFromKey('previewPO', 317.4, 144.52, 242.04, 37.81);
-  await addSignatureFromKey('previewW', 29.04, 145.83, 242.04, 36.51);
-
-  const pdfBytes = await pdfDoc.save();
-  const blob = new Blob([pdfBytes], { type: 'application/pdf' });
-  const url = URL.createObjectURL(blob);
-  const a = document.createElement('a');
-  a.href = url; a.download = 'Filled_LF1042.pdf'; a.click();
-  URL.revokeObjectURL(url);
+  await addSig('previewPO',317.4,144.52,242.04,37.81);
+  await addSig('previewW',29.04,145.83,242.04,36.51);
+  const pdfBytes=await pdfDoc.save();
+  const blob=new Blob([pdfBytes],{type:'application/pdf'});
+  const url=URL.createObjectURL(blob);
+  const a=document.createElement('a');a.href=url;a.download='Filled_LF1042.pdf';a.click();URL.revokeObjectURL(url);
 }
-
-document.getElementById('generate').addEventListener('click', fillPDF);
-document.getElementById('resetAll').addEventListener('click', ()=>{
-  if(confirm('Clear all saved form data?')){
-    localStorage.clear();
-    location.reload();
-  }
-});
+document.getElementById('generate').onclick=fillPDF;
+document.getElementById('resetAll').onclick=()=>{if(confirm('Clear all data?')){localStorage.clear();location.reload();}};
 </script>
 </body>
 </html>
