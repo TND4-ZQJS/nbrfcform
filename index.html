@@ -214,6 +214,8 @@ document.getElementById("previewW").addEventListener("click",()=>openSig("previe
 
 function openSig(id){
   activeSigField = id;
+  modal.style.display = "flex"; // Show modal first
+  resizeCanvas(); // Resize after visible so it gets correct dimensions
   ctx.clearRect(0,0,canvas.width,canvas.height);
   const saved = localStorage.getItem(id+"_sig");
   if(saved){
@@ -221,7 +223,6 @@ function openSig(id){
     img.src=saved;
     img.onload=()=>ctx.drawImage(img,0,0,canvas.width/(window.devicePixelRatio||1),canvas.height/(window.devicePixelRatio||1));
   }
-  modal.style.display="flex";
 }
 
 document.getElementById("doneSig").addEventListener("click",()=>{
