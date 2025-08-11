@@ -156,7 +156,7 @@ const sameCb=document.getElementById('sameAsLifeProposed');
 const poName=document.getElementById('Sign_LifeProposedPO_Name');
 const poNRIC=document.getElementById('Sign_LifeProposedPO_NRIC');
 const lifeName=document.getElementById('LifeProposed_Name');
-const lifeNRIC=document.getElementById('Lifeproposed_NRIC');
+const lifeNRIC=document.getElementById('LifeProposed_NRIC'); // ✅ fixed ID
 sameCb.addEventListener('change',()=>{
   if(sameCb.checked){
     poName.value=lifeName.value;
@@ -172,7 +172,8 @@ function setupCanvas(id,clearId){
   const c=document.getElementById(id),ctx=c.getContext("2d");
   function resize(){
     const ratio=window.devicePixelRatio||1;
-    c.width=c.offsetWidth*ratio;c.height=150*ratio;
+    c.width=c.offsetWidth*ratio;
+    c.height=150*ratio;
     ctx.setTransform(1,0,0,1,0,0);ctx.scale(ratio,ratio);
     ctx.lineWidth=2;ctx.lineCap="round";ctx.strokeStyle="#000";
   }
@@ -196,6 +197,7 @@ document.querySelectorAll("input,select,textarea").forEach(el=>{
   el.addEventListener("input",()=>localStorage.setItem(el.id,el.value));
   const saved=localStorage.getItem(el.id);if(saved)el.value=saved;
 });
+document.querySelectorAll("textarea").forEach(t=>autoResize(t)); // resize after restore
 
 // Fill PDF
 async function fillPDF(){
@@ -203,31 +205,33 @@ async function fillPDF(){
   const bytes=await res.arrayBuffer();
   const pdfDoc=await PDFLib.PDFDocument.load(bytes);
   const form=pdfDoc.getForm();
-  function set(id){try{form.getTextField(id).setText(document.getElementById(id).value||"");}catch(e){}}
-  set("LifeProposed_Name");
-  set("LifeProposed_NRIC");
-  set("PolicyNo");
-  set("Amendment_WriteDetails");
-  set("Signed_Day");
-  set("Signed_Month");
-  set("Signed_Year");
-  set("Signed_State");
-  set("Sign_Witness_Name");
-  set("Sign_Witness_NRIC");
-  set("Sign_LifeProposedPO_Name");
-  set("Sign_LifeProposedPO_NRIC");
-  set("Sign_LifeProposedPO_Mobile");
+  
+  function setField(id){
+    const el=document.getElementById(id);
+    if(!el) return;
+    try{form.getTextField(id).setText(el.value||"");}
+    catch(e){console.warn("Missing field:",id);}
+  }
+
+  // Fill all known fields
+  ["PolicyNo","Amendment_WriteDetails","Signed_Day","Signed_Month","Signed_Year",
+   "Sign_Witness_Name","Sign_Witness_NRIC","Sign_LifeProposedPO_Name",
+   "Sign_LifeProposedPO_NRIC","Sign_LifeProposedPO_Mobile",
+   "LifeProposed_NRIC","LifeProposed_Name","Signed_State"].forEach(setField);
 
   const pages=pdfDoc.getPages();
   const page=pages[0];
-  if(sigPO.canvas.toDataURL().length>100){
-    const png=await pdfDoc.embedPng(await fetch(sigPO.canvas.toDataURL()).then(r=>r.arrayBuffer()));
-    page.drawImage(png,{x:350,y:150,width:160,height:50}); // approx coords
+
+  async function addSignature(canvas,x,y,w,h){
+    if(canvas.toDataURL().length>100){
+      const pngBytes=await fetch(canvas.toDataURL("image/png")).then(r=>r.arrayBuffer());
+      const png=await pdfDoc.embedPng(pngBytes);
+      page.drawImage(png,{x,y,width:w,height:h});
+    }
   }
-  if(sigW.canvas.toDataURL().length>100){
-    const png=await pdfDoc.embedPng(await fetch(sigW.canvas.toDataURL()).then(r=>r.arrayBuffer()));
-    page.drawImage(png,{x:150,y:150,width:160,height:50}); // approx coords
-  }
+
+  await addSignature(sigPO.canvas,350,150,160,50);
+  await addSignature(sigW.canvas,150,150,160,50);
 
   const pdfBytes=await pdfDoc.save();
   const blob=new Blob([pdfBytes],{type:"application/pdf"});
@@ -239,7 +243,10 @@ async function fillPDF(){
 
 document.getElementById("generate").addEventListener("click",fillPDF);
 document.getElementById("resetAll").addEventListener("click",()=>{
-  localStorage.clear();location.reload();
+  if(confirm("Clear all saved form data?")){
+    localStorage.clear();
+    location.reload();
+  }
 });
 </script>
 </body>
