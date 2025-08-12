@@ -271,6 +271,14 @@ document.querySelectorAll("input,select,textarea").forEach(el=>{
   const saved=localStorage.getItem(el.id);if(saved)el.value=saved;
 });
 
+// Force actual stored value to uppercase for section 1 & 3
+document.querySelectorAll(".section1 input, .section3 input").forEach(el => {
+  el.addEventListener("input", () => {
+    el.value = el.value.toUpperCase();
+    localStorage.setItem(el.id, el.value);
+  });
+});
+
 // Fill PDF
 async function fillPDF(){
   const res=await fetch("Amendment to Application_LF1042_fillable.pdf");
