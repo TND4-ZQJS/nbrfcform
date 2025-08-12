@@ -291,24 +291,30 @@ async function fillPDF(){
   const sigHeight=76.50; // doubled height for taller signature area
   const poSig=localStorage.getItem('policyowner_sig');
   const wSig=localStorage.getItem('witness_sig');
-  if(poSig){
-    const png = await pdfDoc.embedPng(await fetch(poSig).then(r => r.arrayBuffer()));
-    page.drawImage(png, {
-      x: 342.55,    // Policy Owner signature left (points)
-      y: 146.18,    // Policy Owner signature bottom (points)
-      width: sigWidth,
-      height: sigHeight
-    });
-  }
-  if(wSig){
-    const png = await pdfDoc.embedPng(await fetch(wSig).then(r => r.arrayBuffer()));
-    page.drawImage(png, {
-      x: 47.56,     // Witness signature left (points)
-      y: 146.18,    // Witness signature bottom (points)
-      width: sigWidth,
-      height: sigHeight
-    });
-  }
+  
+  const poXOffset = parseFloat(document.getElementById('poX').value) || 0;
+const poYOffset = parseFloat(document.getElementById('poY').value) || 0;
+const wXOffset = parseFloat(document.getElementById('wX').value) || 0;
+const wYOffset = parseFloat(document.getElementById('wY').value) || 0;
+
+if(poSig){
+  const png = await pdfDoc.embedPng(await fetch(poSig).then(r => r.arrayBuffer()));
+  page.drawImage(png, {
+    x: 342.55 + poXOffset,    // adjust dynamically
+    y: 146.18 + poYOffset,
+    width: sigWidth,
+    height: sigHeight
+  });
+}
+if(wSig){
+  const png = await pdfDoc.embedPng(await fetch(wSig).then(r => r.arrayBuffer()));
+  page.drawImage(png, {
+    x: 47.56 + wXOffset,      // adjust dynamically
+    y: 146.18 + wYOffset,
+    width: sigWidth,
+    height: sigHeight
+  });
+}
   const pdfBytes=await pdfDoc.save();
   const blob=new Blob([pdfBytes],{type:"application/pdf"});
   const url=URL.createObjectURL(blob);
