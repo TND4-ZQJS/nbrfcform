@@ -146,20 +146,6 @@
 </div>
 </section>
 
-
-<div style="display:flex;flex-wrap:wrap;gap:12px;">
-  <div>
-    <strong>Policy Owner Offset</strong><br>
-    X: <input type="number" id="poX" value="0" style="width:60px;"> 
-    Y: <input type="number" id="poY" value="0" style="width:60px;">
-  </div>
-  <div>
-    <strong>Witness Offset</strong><br>
-    X: <input type="number" id="wX" value="0" style="width:60px;"> 
-    Y: <input type="number" id="wY" value="0" style="width:60px;">
-  </div>
-</div>
-
 <!-- Actions -->
 <section class="section actions">
   <button id="generate">Generate PDF</button>
@@ -292,29 +278,32 @@ async function fillPDF(){
   const poSig=localStorage.getItem('policyowner_sig');
   const wSig=localStorage.getItem('witness_sig');
   
-  const poXOffset = parseFloat(document.getElementById('poX').value) || 0;
-const poYOffset = parseFloat(document.getElementById('poY').value) || 0;
-const wXOffset = parseFloat(document.getElementById('wX').value) || 0;
-const wYOffset = parseFloat(document.getElementById('wY').value) || 0;
+  // Default offsets in points
+const poXOffset = -50;  // Policy Owner X shift
+const poYOffset = -20;  // Policy Owner Y shift
+const wXOffset  = -50;  // Witness X shift
+const wYOffset  = -20;  // Witness Y shift
 
 if(poSig){
   const png = await pdfDoc.embedPng(await fetch(poSig).then(r => r.arrayBuffer()));
   page.drawImage(png, {
-    x: 342.55 + poXOffset,    // adjust dynamically
+    x: 342.55 + poXOffset,
     y: 146.18 + poYOffset,
     width: sigWidth,
     height: sigHeight
   });
 }
+
 if(wSig){
   const png = await pdfDoc.embedPng(await fetch(wSig).then(r => r.arrayBuffer()));
   page.drawImage(png, {
-    x: 47.56 + wXOffset,      // adjust dynamically
+    x: 47.56 + wXOffset,
     y: 146.18 + wYOffset,
     width: sigWidth,
     height: sigHeight
   });
 }
+  
   const pdfBytes=await pdfDoc.save();
   const blob=new Blob([pdfBytes],{type:"application/pdf"});
   const url=URL.createObjectURL(blob);
