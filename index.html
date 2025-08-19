@@ -473,7 +473,7 @@ async function generatePDF(){
   // Fill fields
   setText('LifeProposed_Name', appState.LifeProposed_Name);
   setText('LifeProposed_NRIC', appState.LifeProposed_NRIC);
-  setText('PolicyNo', (appState.policies[0]?.PolicyNo) || '');
+  setText('PolicyNo', appState.PolicyNo);
   setText('Amendment_WriteDetails', appState.Amendment_WriteDetails);
   setText('Signed_State', appState.Signed_State);
   setText('Signed_Day', appState.Signed_Day);
