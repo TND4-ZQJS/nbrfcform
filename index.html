@@ -89,22 +89,14 @@
       <label style="flex:1">Proposed Life Insured/Insured Name
         <input id="LifeProposed_Name" type="text" placeholder="FULL NAME AS IN I/C">
       </label>
-      <label style="flex:1">IC Number
+      <label style="flex:1">IC No.
         <input id="LifeProposed_NRIC" type="text" placeholder="e.g. 900101-14-1234">
       </label>
+      <label style="flex:1">Policy No. 
+        <input id="PolicyNo" type="text" placeholder="Enter Policy No.">
     </div>
   </section>
 
-  <!-- Section: Policies (replicate dynamic multi-item behavior; stores multiple policy numbers) -->
-  <section class="section" id="sectionA">
-    <h2>Related Policies</h2>
-    <div id="policiesContainer" class="policy-grid"></div>
-    <div class="row">
-      <button id="addPolicy">+ Add Another Policy</button>
-      <small class="muted">Up to 4 policies</small>
-    </div>
-    <small class="muted">Note: The first policy listed maps to the PDF field <code>PolicyNo</code>. Add more for your own record (kept in autosave).</small>
-  </section>
 
   <!-- Section: Details of Amendment -->
   <section class="section">
@@ -355,47 +347,6 @@ function bindSelectField(id){
   if(appState[id]) node.value = appState[id];
 }
 
-/* ============================================================
-   POLICIES (Replicate dynamic add/remove multi-item behavior)
-   Each tile contains: Policy No (text) — kept simple per requirement.
-   ============================================================ */
-let policyCounter = 0;
-function renderPolicies(){
-  const wrap = $('#policiesContainer');
-  wrap.innerHTML = '';
-  appState.policies.forEach((p, idx)=>{
-    const tile = el('div', {className:'policy'});
-    const title = el('h3');
-    title.textContent = `Policy ${idx+1}`;
-    const removeBtn = el('button', {className:'remove-btn', textContent:'Remove'});
-    removeBtn.onclick = ()=>{ removePolicy(p.id); };
-    title.append(removeBtn);
-
-    const policyInputLabel = el('label');
-    policyInputLabel.textContent = 'Policy No.';
-    const policyInput = el('input', {type:'text', id:`PolicyNo_${p.id}`, value:p.PolicyNo||''});
-    policyInput.addEventListener('input', ()=>{
-      p.PolicyNo = policyInput.value;
-      persist();
-    });
-    policyInputLabel.append(policyInput);
-
-    tile.append(title, policyInputLabel);
-    wrap.append(tile);
-  });
-}
-function addPolicy(initial=''){
-  if(appState.policies.length >= MAX_POLICIES) return;
-  const id = ++policyCounter;
-  appState.policies.push({id, PolicyNo: initial});
-  persist();
-  renderPolicies();
-}
-function removePolicy(id){
-  appState.policies = appState.policies.filter(p=>p.id!==id);
-  persist();
-  renderPolicies();
-}
 
 /* ============================================================
    SIGNATURE MODAL + CANVAS (shared for owner/witness)
