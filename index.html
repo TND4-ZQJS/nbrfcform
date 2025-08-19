@@ -143,6 +143,14 @@
       <label style="flex:1">Name of Proposed Life Insured/Policyowner
         <input id="Sign_LifeProposedPO_Name" class="persist" type="text" placeholder="AS IN I/C">
       </label>
+    <label style="flex:1">IC No.
+        <input id="Sign_LifeProposedPO_NRIC" class="persist" type="text" placeholder="e.g. 900101-14-1234">
+    </label>
+    <label style="flex:1">Mobile No.
+        <input id="Sign_LifeProposedPO_Mobile" class="persist" type="text" placeholder="e.g. 012-3456789">
+    </label>
+</div>
+
     </div>
 
     <div class="row">
@@ -529,6 +537,8 @@ async function generatePdf(){
   setSelectText('Signed_Year', 'Signed_Year');
 
   setText('Sign_LifeProposedPO_Name', 'Sign_LifeProposedPO_Name');
+  setText('Sign_LifeProposedPO_NRIC', 'Sign_LifeProposedPO_NRIC');
+  setText('Sign_LifeProposedPO_Mobile', 'Sign_LifeProposedPO_Mobile');
   setText('Sign_Witness_Name', 'Sign_Witness_Name');
   setText('Sign_Witness_NRIC', 'Sign_Witness_NRIC');
 
