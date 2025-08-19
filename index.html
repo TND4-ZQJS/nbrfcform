@@ -1,713 +1,566 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="utf-8" />
-<title>Amendment to Application — Web Filler (LF1042).</title>
-<meta name="viewport" content="width=device-width,initial-scale=1" />
-<!-- CSS copied/adapted 1:1 from reference for look & feel -->
-<style>
-:root{ --bg:#f6f7f9; --card:#fff; --accent:#007aff; --muted:#666; --line:#e9e9ee; }
-*{box-sizing:border-box}
-body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Arial;margin:18px;background:var(--bg);color:#111}
-main{max-width:980px;margin:0 auto;background:var(--card);padding:18px;border-radius:12px;box-shadow:0 8px 28px rgba(0,0,0,0.06)}
-h1{margin:15px 0 35px 0;font-size:1.50rem}
-.section{background:#fbfbfd;border:1px solid #eee;padding:14px;border-radius:10px;margin:12px 0}
-.section h2{margin:0 0 10px 0;font-size:1.05rem}
-label{display:block;margin:8px 0;font-size:0.95rem}
-input[type=text],input[type=email],input[type=number],input[type=tel],select,textarea{
-  width:100%;padding:10px;border-radius:10px;border:1px solid #ddd;margin-top:6px;font-size:1rem;background:#fff
-}
-.row{display:flex;gap:12px;align-items:center;flex-wrap:wrap;margin:8px 0}
-.muted{color:var(--muted);font-size:0.85rem}
-button{background:var(--accent);color:#fff;border:0;padding:10px 14px;border-radius:10px;cursor:pointer}
-button.secondary{background:#999}
-button.ghost{background:transparent;border:1px solid var(--line);color:#333}
-.actions{display:flex;gap:12px;align-items:center}
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Amendment to Application</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap');
+        body {
+            font-family: 'Roboto', sans-serif;
+            margin: 0;
+            padding: 20px;
+            background-color: #f0f2f5;
+        }
 
-/* header/grid from ref */
-.header-agree{display:flex;align-items:center;gap:10px;padding:10px 12px;border:1px solid var(--line);border-radius:10px;background:#fff;}
-.header-agree input[type=checkbox]{margin:0}
-.header-agree .title{font-weight:600}
-.header-grid{margin-top:10px;display:grid;gap:10px;grid-template-columns: 1fr 1fr;align-items:start;}
-.header-item{background:#fff;border:1px solid var(--line);border-radius:10px;padding:10px 12px;display:flex;align-items:center;gap:8px}
-.header-item .stack{display:flex;flex-direction:column;gap:6px;width:100%}
-.header-item .inline{display:flex;align-items:center;gap:8px}
-.amount-wrap{background:#fff;border:1px solid var(--line);border-radius:10px;padding:10px 12px}
-.amount-wrap label{margin:0}
+        .container {
+            max-width: 900px;
+            margin: auto;
+            background: #fff;
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
 
-/* policy grid */
-.policy-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
-.policy{background:#fff;padding:12px;border-radius:10px;border:1px solid #eee;position:relative}
-.policy h3{margin:0 0 8px 0;font-size:0.95rem;display:flex;align-items:center;justify-content:space-between}
-.policy .remove-btn{background:transparent;border:1px solid var(--line);color:#333;border-radius:8px;padding:6px 10px;font-size:0.9rem}
+        h1, h2 {
+            color: #333;
+            border-bottom: 2px solid #0056b3;
+            padding-bottom: 10px;
+            margin-bottom: 20px;
+        }
 
-/* signature preview tiles */
-.sig-preview{width:100%; height:150px; border:1px dashed #bbb; border-radius:10px; display:flex; align-items:center; justify-content:center; background:#fff; cursor:pointer; position:relative;}
-.sig-preview img{ max-width:100%; max-height:100%; object-fit:contain; }
-.sig-preview span{ color:#999; }
+        .form-section {
+            margin-bottom: 30px;
+        }
 
-/* Signature Modal */
-.sig-modal{ display:none; position:fixed; inset:0; background:rgba(0,0,0,.45); z-index:1000; }
-.sig-modal .box{ width:min(560px, 92vw); background:#fff; margin:6vh auto; padding:14px; border-radius:12px; box-shadow:0 18px 50px rgba(0,0,0,.25) }
-.sig-modal h3{ margin:0 0 8px 0; }
-/* NOTE: canvas is responsive via CSS; internal pixels are set in JS for crispness */
-#sigCanvas{ width:100%; height:220px; background:#fff; border:1px solid #ddd; border-radius:10px; touch-action:none }
-.sig-actions{ display:flex; gap:10px; justify-content:flex-end; margin-top:10px; }
+        .form-row {
+            display: flex;
+            flex-wrap: wrap;
+            margin-bottom: 15px;
+        }
 
-/* XY% signature tuning */
-.hidden-inputs {display: none;}
+        .form-group {
+            flex: 1;
+            min-width: 200px;
+            margin-right: 20px;
+            margin-bottom: 15px;
+        }
 
-/* Save indicator */
-#saveStatus{ position:fixed; bottom:12px; right:12px; background:var(--accent); color:#fff; padding:6px 10px; border-radius:8px; font-size:0.85rem; opacity:0; transition:opacity .25s; }
+        .form-group:last-child {
+            margin-right: 0;
+        }
 
-@media (max-width:900px){ .header-grid{grid-template-columns:1fr} }
-@media (max-width:720px){ .policy-grid{grid-template-columns:1fr} }
-</style>
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 700;
+            color: #555;
+        }
+
+        input[type="text"], textarea, select {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            box-sizing: border-box;
+            font-family: 'Roboto', sans-serif;
+        }
+
+        input[type="text"]:focus, textarea:focus, select:focus {
+            border-color: #007bff;
+            box-shadow: 0 0 5px rgba(0, 123, 255, 0.25);
+            outline: none;
+        }
+
+        textarea {
+            resize: vertical;
+        }
+
+        .btn-group {
+            margin-top: 20px;
+            display: flex;
+            justify-content: flex-end;
+        }
+
+        .btn {
+            padding: 12px 25px;
+            border: none;
+            border-radius: 5px;
+            font-size: 16px;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+            color: #fff;
+        }
+
+        .btn-primary {
+            background-color: #007bff;
+        }
+
+        .btn-primary:hover {
+            background-color: #0056b3;
+        }
+
+        .btn-secondary {
+            background-color: #6c757d;
+            margin-right: 10px;
+        }
+
+        .btn-secondary:hover {
+            background-color: #5a6268;
+        }
+
+        .signature-section {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: space-between;
+            margin-top: 30px;
+        }
+
+        .signature-pad-container {
+            flex-basis: 48%;
+            border: 1px solid #ddd;
+            padding: 15px;
+            border-radius: 5px;
+            background-color: #fafafa;
+            margin-bottom: 20px;
+        }
+
+        .signature-canvas-container {
+            border: 1px solid #000;
+            background-color: #fff;
+            margin-top: 10px;
+        }
+
+        canvas {
+            width: 100%;
+            height: 150px;
+            cursor: crosshair;
+        }
+
+        .clear-btn {
+            background-color: #dc3545;
+            color: white;
+            padding: 8px 15px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            margin-top: 10px;
+            float: right;
+        }
+
+        .clear-btn:hover {
+            background-color: #c82333;
+        }
+
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 100;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            overflow: auto;
+            background-color: rgb(0,0,0);
+            background-color: rgba(0,0,0,0.4);
+        }
+
+        .modal-content {
+            background-color: #fefefe;
+            margin: 15% auto;
+            padding: 20px;
+            border: 1px solid #888;
+            width: 80%;
+            max-width: 600px;
+            border-radius: 8px;
+            position: relative;
+        }
+
+        .close {
+            color: #aaa;
+            float: right;
+            font-size: 28px;
+            font-weight: bold;
+        }
+
+        .close:hover,
+        .close:focus {
+            color: black;
+            text-decoration: none;
+            cursor: pointer;
+        }
+
+        #pdf-preview-container {
+            width: 100%;
+            height: 700px;
+            border: 1px solid #ccc;
+            margin-top: 20px;
+        }
+    </style>
 </head>
 <body>
-<main>
-  <h1>Amendment to Application (LF1042) — Web Filler</h1>
+    <div class="container">
+        <h1>Amendment to Application</h1>
+        <form id="amendmentForm">
+            <div class="form-section">
+                <h2>Proposed Life Insured Info</h2>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="LifeProposed_Name">Proposed Life Insured/Insured Name</label>
+                        <input type="text" id="LifeProposed_Name" name="LifeProposed_Name">
+                    </div>
+                    <div class="form-group">
+                        <label for="PolicyNo">Policy No.</label>
+                        <input type="text" id="PolicyNo" name="PolicyNo">
+                    </div>
+                    <div class="form-group">
+                        <label for="LifeProposed_NRIC">IC Number</label>
+                        <input type="text" id="LifeProposed_NRIC" name="LifeProposed_NRIC">
+                    </div>
+                </div>
+            </div>
 
-  <section class="section header">
-    <h2>Form Controls</h2>
-    <div class="row">
-      <label style="flex:1">
-        Load PDF file (Amendment to Application_LF1042_fillable.pdf):
-        <input id="pdfFileInput" type="file" accept="application/pdf">
-      </label>
-      <div style="min-width:220px">
-        <div class="row">
-          <button id="fillPdfBtn">Fill & Download PDF</button>
-          <button id="previewPdfBtn" class="secondary">Preview (open in new tab)</button>
+            <hr>
+
+            <div class="form-section">
+                <h2>Details of Amendment</h2>
+                <div class="form-row">
+                    <div class="form-group" style="flex: 100%;">
+                        <label for="Amendment_WriteDetails">Write details here</label>
+                        <textarea id="Amendment_WriteDetails" name="Amendment_WriteDetails" rows="5"></textarea>
+                    </div>
+                </div>
+            </div>
+
+            <hr>
+
+            <div class="form-section">
+                <h2>Declarations</h2>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="Signed_State">Signed at State</label>
+                        <select id="Signed_State" name="Signed_State">
+                            <option value="">- Please Select -</option>
+                            <option value="JOHOR">JOHOR</option>
+                            <option value="KEDAH">KEDAH</option>
+                            <option value="KELANTAN">KELANTAN</option>
+                            <option value="KUALA LUMPUR">KUALA LUMPUR</option>
+                            <option value="MELAKA">MELAKA</option>
+                            <option value="NEGERI SEMBILAN">NEGERI SEMBILAN</option>
+                            <option value="PAHANG">PAHANG</option>
+                            <option value="PERAK">PERAK</option>
+                            <option value="PERLIS">PERLIS</option>
+                            <option value="PULAU PINANG">PULAU PINANG</option>
+                            <option value="SABAH">SABAH</option>
+                            <option value="SARAWAK">SARAWAK</option>
+                            <option value="SELANGOR">SELANGOR</option>
+                            <option value="TERENGGANU">TERENGGANU</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="Signed_Day">Day</label>
+                        <select id="Signed_Day" name="Signed_Day">
+                            <option value="">- Please Select -</option>
+                            </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="Signed_Month">Month</label>
+                        <select id="Signed_Month" name="Signed_Month">
+                            <option value="">- Please Select -</option>
+                            </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="Signed_Year">Year</label>
+                        <select id="Signed_Year" name="Signed_Year">
+                            <option value="">- Please Select -</option>
+                            </select>
+                    </div>
+                </div>
+            </div>
+
+            <hr>
+
+            <div class="form-section signature-section">
+                <div class="signature-pad-container">
+                    <h3>Signature of Proposed Life Insured/Policyowner</h3>
+                    <div class="form-group">
+                        <label for="Sign_LifeProposedPO_Name">Name of Proposed Life Insured/Policyowner</label>
+                        <input type="text" id="Sign_LifeProposedPO_Name" name="Sign_LifeProposedPO_Name">
+                    </div>
+                    <div class="signature-canvas-container">
+                        <canvas id="Signature_LifeProposedPO"></canvas>
+                    </div>
+                    <button type="button" class="clear-btn" data-canvas-id="Signature_LifeProposedPO">Clear Signature</button>
+                </div>
+                
+                <div class="signature-pad-container">
+                    <h3>Signature of Witness</h3>
+                    <div class="form-group">
+                        <label for="Sign_Witness_Name">Name of Witness</label>
+                        <input type="text" id="Sign_Witness_Name" name="Sign_Witness_Name">
+                    </div>
+                    <div class="form-group">
+                        <label for="Sign_Witness_NRIC">IC No.</label>
+                        <input type="text" id="Sign_Witness_NRIC" name="Sign_Witness_NRIC">
+                    </div>
+                    <div class="signature-canvas-container">
+                        <canvas id="Signature_Witness"></canvas>
+                    </div>
+                    <button type="button" class="clear-btn" data-canvas-id="Signature_Witness">Clear Signature</button>
+                </div>
+            </div>
+
+            <div class="btn-group">
+                <button type="button" class="btn btn-secondary" id="resetBtn">Reset</button>
+                <button type="button" class="btn btn-primary" id="previewAndSubmit">Preview & Submit</button>
+            </div>
+        </form>
+    </div>
+
+    <div id="pdfModal" class="modal">
+        <div class="modal-content">
+            <span class="close">&times;</span>
+            <h2>PDF Preview</h2>
+            <div id="pdf-preview-container"></div>
+            <button type="button" class="btn btn-primary" id="downloadPdfBtn">Download PDF</button>
         </div>
-        <div style="margin-top:8px" class="muted">Upload the LF1042 fillable PDF. Fields are mapped and signatures embedded.</div>
-      </div>
-    </div>
-  </section>
-
-  <section class="section" id="sectionA">
-    <h2>Section: Proposed Life Insured Info</h2>
-    <label>Proposed Life Insured / Insured Name
-      <input id="LifeProposed_Name" type="text" placeholder="Full name (as in NRIC)">
-    </label>
-
-    <div class="row">
-      <label style="flex:1">Policy No.
-        <input id="PolicyNo" type="text" placeholder="Policy number">
-      </label>
-      <label style="flex:1">IC Number
-        <input id="LifeProposed_NRIC" type="text" placeholder="e.g. 900101-01-1234">
-      </label>
-    </div>
-  </section>
-
-  <section class="section">
-    <h2>Section: Details of Amendment</h2>
-    <label>Write details here
-      <textarea id="Amendment_WriteDetails" rows="5" placeholder="Describe amendment..."></textarea>
-    </label>
-  </section>
-
-  <section class="section">
-    <h2>Section: Policy Entries (dynamic)</h2>
-    <div id="policiesContainer" class="policy-grid"></div>
-    <div class="row">
-      <button id="addPolicy">+ Add Another Policy</button>
-      <small class="muted">Up to 4 policies (mirrors reference behavior)</small>
-    </div>
-  </section>
-
-  <section class="section">
-    <h2>Signature & Signing Details</h2>
-
-    <div class="row">
-      <label style="flex:1">Signed at State
-        <select id="Signed_State">
-          <option value="">-- Select State --</option>
-          <option>Johor</option><option>Kedah</option><option>Kelantan</option><option>Melaka</option>
-          <option>Negeri Sembilan</option><option>Pahang</option><option>Penang</option><option>Perak</option>
-          <option>Perlis</option><option>Sabah</option><option>Sarawak</option><option>Selangor</option>
-          <option>Terengganu</option><option>KL</option><option>Labuan</option><option>Putrajaya</option>
-        </select>
-      </label>
-
-      <label style="flex:1">Day
-        <select id="Signed_Day"><option value="">-- DD --</option></select>
-      </label>
-
-      <label style="flex:1">Month
-        <select id="Signed_Month"><option value="">-- Month --</option></select>
-      </label>
-
-      <label style="flex:1">Year
-        <select id="Signed_Year"><option value="">-- YYYY --</option></select>
-      </label>
     </div>
 
-    <hr style="margin:12px 0">
+    <script src="https://unpkg.com/pdf-lib@1.17.1/dist/pdf-lib.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/signature_pad@4.1.7/dist/signature_pad.umd.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/pdfjs-dist@2.14.305/build/pdf.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/pdfjs-dist@2.14.305/build/pdf.worker.min.js"></script>
 
-    <h3>Signature of Proposed Life Insured / Policyowner</h3>
-    <label>Name
-      <input id="Sign_LifeProposedPO_Name" type="text" placeholder="Name of Proposed Life Insured / Policyowner">
-    </label>
-    <div class="row">
-      <div style="flex:1">
-        <div id="sigPreview_PO" class="sig-preview" title="Click to sign (Proposed Life Insured)">
-          <span>Click to draw signature</span>
-        </div>
-      </div>
-      <div style="min-width:160px;display:flex;flex-direction:column;gap:8px">
-        <button id="openSig_PO">Sign / Edit</button>
-        <button id="clearSig_PO" class="ghost">Clear Signature</button>
-      </div>
-    </div>
+    <script>
+        // PDF.js worker source
+        pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdn.jsdelivr.net/npm/pdfjs-dist@2.14.305/build/pdf.worker.min.js';
 
-    <hr style="margin:12px 0">
+        // Signature Pads
+        const signaturePadLifeProposed = new SignaturePad(document.getElementById('Signature_LifeProposedPO'));
+        const signaturePadWitness = new SignaturePad(document.getElementById('Signature_Witness'));
 
-    <h3>Signature of Witness</h3>
-    <label>Name
-      <input id="Sign_Witness_Name" type="text" placeholder="Witness name">
-    </label>
-    <label>IC No.
-      <input id="Sign_Witness_NRIC" type="text" placeholder="Witness NRIC">
-    </label>
-    <div class="row">
-      <div style="flex:1">
-        <div id="sigPreview_WIT" class="sig-preview" title="Click to sign (Witness)">
-          <span>Click to draw signature</span>
-        </div>
-      </div>
-      <div style="min-width:160px;display:flex;flex-direction:column;gap:8px">
-        <button id="openSig_WIT">Sign / Edit</button>
-        <button id="clearSig_WIT" class="ghost">Clear Signature</button>
-      </div>
-    </div>
+        // Form and Buttons
+        const form = document.getElementById('amendmentForm');
+        const previewAndSubmitBtn = document.getElementById('previewAndSubmit');
+        const resetBtn = document.getElementById('resetBtn');
+        const downloadPdfBtn = document.getElementById('downloadPdfBtn');
+        
+        // Modal and Preview
+        const pdfModal = document.getElementById('pdfModal');
+        const modalCloseBtn = document.querySelector('#pdfModal .close');
+        const pdfPreviewContainer = document.getElementById('pdf-preview-container');
 
-  </section>
+        // Date dropdowns
+        const signedDaySelect = document.getElementById('Signed_Day');
+        const signedMonthSelect = document.getElementById('Signed_Month');
+        const signedYearSelect = document.getElementById('Signed_Year');
 
-  <section class="section">
-    <h2>Actions</h2>
-    <div class="row actions">
-      <button id="saveLocalBtn" class="secondary">Save Now</button>
-      <button id="resetBtn" class="ghost">Reset All (clear localStorage)</button>
-      <button id="downloadJson" class="secondary">Download JSON (backup)</button>
-    </div>
-  </section>
+        // Populate date dropdowns
+        function populateDateDropdowns() {
+            // Days (1-31)
+            for (let i = 1; i <= 31; i++) {
+                const option = document.createElement('option');
+                option.value = i.toString().padStart(2, '0');
+                option.textContent = i.toString().padStart(2, '0');
+                signedDaySelect.appendChild(option);
+            }
 
-  <!-- Hidden inputs to mirror mapping if needed -->
-  <div class="hidden-inputs" aria-hidden="true">
-    <!-- keeps mapping reference -->
-    <input id="map_LifeProposed_Name" data-map="LifeProposed_Name">
-    <input id="map_PolicyNo" data-map="PolicyNo">
-    <input id="map_LifeProposed_NRIC" data-map="LifeProposed_NRIC">
-    <input id="map_Amendment_WriteDetails" data-map="Amendment_WriteDetails">
-    <input id="map_Signed_State" data-map="Signed_State">
-    <input id="map_Signed_Day" data-map="Signed_Day">
-    <input id="map_Signed_Month" data-map="Signed_Month">
-    <input id="map_Signed_Year" data-map="Signed_Year">
-    <input id="map_Sign_LifeProposedPO_Name" data-map="Sign_LifeProposedPO_Name">
-    <input id="map_Sign_Witness_Name" data-map="Sign_Witness_Name">
-    <input id="map_Sign_Witness_NRIC" data-map="Sign_Witness_NRIC">
-  </div>
+            // Months
+            const months = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
+            months.forEach((month, index) => {
+                const option = document.createElement('option');
+                option.value = (index + 1).toString().padStart(2, '0');
+                option.textContent = month;
+                signedMonthSelect.appendChild(option);
+            });
 
-  <div id="saveStatus">Saved</div>
-</main>
-
-<!-- Signature modal -->
-<div id="sigModal" class="sig-modal" aria-hidden="true">
-  <div class="box" role="dialog" aria-modal="true">
-    <h3 id="sigModalTitle">Signature</h3>
-    <canvas id="sigCanvas"></canvas>
-    <div style="margin-top:8px; display:flex; gap:8px; justify-content:flex-end;">
-      <button id="sigClear" class="ghost">Clear</button>
-      <button id="sigCancel" class="secondary">Cancel</button>
-      <button id="sigSave" style="background:var(--accent)">Save Signature</button>
-    </div>
-  </div>
-</div>
-
-<!-- pdf-lib from CDN -->
-<script src="https://unpkg.com/pdf-lib/dist/pdf-lib.min.js"></script>
-
-<script>
-/*
-  Implementation Notes:
-  - This file mirrors the reference's UI and interactive behavior.
-  - PDF field mappings are done by field name (the names you specified).
-  - Signature embedding uses constants SIGN_COORDS_PO and SIGN_COORDS_WIT below.
-    Adjust these X/Y/scale constants to tune placement on the target PDF.
-  - To embed signatures: we draw PNG image on the PDF page at the given coords.
-*/
-
-/* ---------- Utilities ---------- */
-const $ = id => document.getElementById(id);
-const LS_KEY = 'amend_lf1042_v1';
-
-// Elements
-const inputsToWatch = [
-  'LifeProposed_Name','PolicyNo','LifeProposed_NRIC','Amendment_WriteDetails',
-  'Signed_State','Signed_Day','Signed_Month','Signed_Year',
-  'Sign_LifeProposedPO_Name','Sign_Witness_Name','Sign_Witness_NRIC'
-];
-
-const saveStatusEl = $('saveStatus');
-let saveTimeout = null;
-function showSaved(){
-  saveStatusEl.style.opacity = '1';
-  clearTimeout(saveTimeout);
-  saveTimeout = setTimeout(()=> saveStatusEl.style.opacity='0', 1100);
-}
-
-/* ---------- Populate selects ---------- */
-(function populateDateSelects(){
-  const day = $('Signed_Day'), month = $('Signed_Month'), year = $('Signed_Year');
-  day.innerHTML = '<option value="">-- DD --</option>';
-  for(let d=1; d<=31; d++){ const v=String(d).padStart(2,'0'); day.innerHTML+=`<option value="${v}">${v}</option>`; }
-  month.innerHTML = '<option value="">-- Month --</option>';
-  const months=['January','February','March','April','May','June','July','August','September','October','November','December'];
-  months.forEach((m,i)=> month.innerHTML += `<option value="${String(i+1).padStart(2,'0')}">${m}</option>`);
-  const thisYear = new Date().getFullYear();
-  year.innerHTML = '<option value="">-- YYYY --</option>';
-  for(let y=thisYear; y>=thisYear-20; y--){ year.innerHTML += `<option value="${y}">${y}</option>`; }
-})();
-
-/* ---------- Policies dynamic section (mirrors reference) ---------- */
-const policiesContainer = $('policiesContainer');
-const addPolicyBtn = $('addPolicy');
-let policyCount = 0;
-function createPolicyBlock(data={}){
-  if(policyCount >= 4) return;
-  policyCount++;
-  const wrapper = document.createElement('div');
-  wrapper.className = 'policy';
-  wrapper.id = `policy_${policyCount}`;
-  wrapper.innerHTML = `
-    <h3>Policy ${policyCount} <button class="remove-btn" data-id="${policyCount}">Remove</button></h3>
-    <label>Policy No. <input id="policy_no_${policyCount}" type="text" value="${data.policyNo||''}" placeholder="Policy no"></label>
-    <label>Insured Name <input id="policy_name_${policyCount}" type="text" value="${data.name||''}" placeholder="Insured name"></label>
-    <label>ANP <input id="policy_anp_${policyCount}" type="text" value="${data.anp||''}" placeholder="ANP"></label>
-  `;
-  policiesContainer.appendChild(wrapper);
-
-  wrapper.querySelector('.remove-btn').addEventListener('click', (e)=>{
-    const id = e.currentTarget.dataset.id;
-    const el = $('policy_'+id);
-    if(el){
-      policiesContainer.removeChild(el);
-      policyCount--;
-      saveToLocal();
-    }
-  });
-  // Watch fields inside policy for autosave
-  ['policy_no_', 'policy_name_', 'policy_anp_'].forEach(pref => {
-    const el = $(pref + policyCount);
-    if(el){
-      el.addEventListener('input', debounce(saveToLocal, 300));
-    }
-  });
-}
-addPolicyBtn.addEventListener('click', ()=> createPolicyBlock());
-
-/* ---------- Signature handling ---------- */
-/*
-  Two signature slots: PO (Proposed Owner) and WIT (Witness).
-  We store signatures as dataURL in localStorage keys:
-    LS_KEY + '_sig_PO' and LS_KEY + '_sig_WIT'
-*/
-const sigPreview_PO = $('sigPreview_PO');
-const sigPreview_WIT = $('sigPreview_WIT');
-const openSigPO = $('openSig_PO');
-const openSigWIT = $('openSig_WIT');
-const clearSigPO = $('clearSig_PO');
-const clearSigWIT = $('clearSig_WIT');
-
-// shared modal & canvas
-const sigModal = $('sigModal');
-const sigCanvas = $('sigCanvas');
-const sigModalTitle = $('sigModalTitle');
-const sigSave = $('sigSave');
-const sigCancel = $('sigCancel');
-const sigClear = $('sigClear');
-let sigCtx, drawing = false, last = {};
-let currentSigTarget = null; // 'PO' or 'WIT'
-
-function initCanvas(){
-  // set internal pixels for crisp drawing
-  const DPR = window.devicePixelRatio || 1;
-  const styleW = sigCanvas.clientWidth;
-  const styleH = sigCanvas.clientHeight;
-  sigCanvas.width = Math.max(600, Math.floor(styleW * DPR));
-  sigCanvas.height = Math.max(300, Math.floor(styleH * DPR));
-  sigCanvas.style.width = styleW + 'px';
-  sigCanvas.style.height = styleH + 'px';
-  sigCtx = sigCanvas.getContext('2d');
-  sigCtx.scale(DPR, DPR);
-  sigCtx.lineWidth = 2.4;
-  sigCtx.lineCap = 'round';
-  sigCtx.strokeStyle = '#111';
-  sigCtx.fillStyle = '#fff';
-  sigCtx.clearRect(0,0,sigCanvas.width, sigCanvas.height);
-  sigCtx.fillRect(0,0,sigCanvas.width, sigCanvas.height);
-}
-function openSignatureModal(target){
-  currentSigTarget = target; // 'PO' or 'WIT'
-  sigModalTitle.textContent = target === 'PO' ? 'Signature — Proposed Life Insured / Policyowner' : 'Signature — Witness';
-  sigModal.style.display = 'block';
-  sigModal.setAttribute('aria-hidden','false');
-  initCanvas();
-  // load existing if present
-  const dataKey = LS_KEY + (target==='PO' ? '_sig_PO' : '_sig_WIT');
-  const dataUrl = localStorage.getItem(dataKey);
-  if(dataUrl){
-    const img = new Image();
-    img.onload = function(){
-      sigCtx.drawImage(img, 0, 0, sigCanvas.clientWidth, sigCanvas.clientHeight);
-    };
-    img.src = dataUrl;
-  }
-}
-function closeSignatureModal(){ sigModal.style.display = 'none'; sigModal.setAttribute('aria-hidden','true'); currentSigTarget = null; }
-
-// pointer drawing
-function getPos(e){
-  const rect = sigCanvas.getBoundingClientRect();
-  const clientX = e.touches ? e.touches[0].clientX : e.clientX;
-  const clientY = e.touches ? e.touches[0].clientY : e.clientY;
-  return { x: clientX - rect.left, y: clientY - rect.top };
-}
-function startDraw(e){
-  drawing = true;
-  last = getPos(e);
-  sigCtx.beginPath();
-  sigCtx.moveTo(last.x, last.y);
-  e.preventDefault();
-}
-function moveDraw(e){
-  if(!drawing) return;
-  const pos = getPos(e);
-  sigCtx.lineTo(pos.x, pos.y);
-  sigCtx.stroke();
-  last = pos;
-  e.preventDefault();
-}
-function stopDraw(e){
-  drawing = false;
-  e.preventDefault();
-}
-
-sigCanvas.addEventListener('pointerdown', startDraw);
-sigCanvas.addEventListener('pointermove', moveDraw);
-window.addEventListener('pointerup', stopDraw);
-sigCanvas.addEventListener('touchstart', startDraw);
-sigCanvas.addEventListener('touchmove', moveDraw);
-sigCanvas.addEventListener('touchend', stopDraw);
-
-// open modal events
-openSigPO.addEventListener('click', ()=> openSignatureModal('PO'));
-openSigWIT.addEventListener('click', ()=> openSignatureModal('WIT'));
-sigPreview_PO.addEventListener('click', ()=> openSignatureModal('PO'));
-sigPreview_WIT.addEventListener('click', ()=> openSignatureModal('WIT'));
-
-// modal buttons
-sigSave.addEventListener('click', ()=>{
-  const dataUrl = sigCanvas.toDataURL('image/png');
-  const key = LS_KEY + (currentSigTarget==='PO' ? '_sig_PO' : '_sig_WIT');
-  localStorage.setItem(key, dataUrl);
-  updateSigPreview(currentSigTarget, dataUrl);
-  closeSignatureModal();
-  saveToLocal();
-});
-sigCancel.addEventListener('click', ()=> closeSignatureModal());
-sigClear.addEventListener('click', ()=>{
-  sigCtx.clearRect(0,0,sigCanvas.width, sigCanvas.height);
-  sigCtx.fillStyle = '#fff';
-  sigCtx.fillRect(0,0,sigCanvas.width, sigCanvas.height);
-});
-
-// clear signature buttons
-clearSigPO.addEventListener('click', ()=>{
-  localStorage.removeItem(LS_KEY + '_sig_PO');
-  updateSigPreview('PO', null);
-  saveToLocal();
-});
-clearSigWIT.addEventListener('click', ()=>{
-  localStorage.removeItem(LS_KEY + '_sig_WIT');
-  updateSigPreview('WIT', null);
-  saveToLocal();
-});
-
-function updateSigPreview(target, dataUrl){
-  const el = target==='PO' ? sigPreview_PO : sigPreview_WIT;
-  el.innerHTML = '';
-  if(!dataUrl){
-    el.innerHTML = '<span>Click to draw signature</span>';
-  } else {
-    const img = document.createElement('img');
-    img.src = dataUrl;
-    el.appendChild(img);
-  }
-}
-
-/* ---------- Autosave / load ---------- */
-function gatherFormState(){
-  const state = {};
-  inputsToWatch.forEach(id => {
-    const el = $(id);
-    state[id] = el ? el.value : '';
-  });
-  // policies
-  state.policies = [];
-  for(let i=1;i<=4;i++){
-    const el = $('policy_'+i);
-    if(el){
-      state.policies.push({
-        policyNo: $(`policy_no_${i}`)?.value || '',
-        name: $(`policy_name_${i}`)?.value || '',
-        anp: $(`policy_anp_${i}`)?.value || ''
-      });
-    }
-  }
-  // signatures
-  state.sig_PO = localStorage.getItem(LS_KEY + '_sig_PO') || null;
-  state.sig_WIT = localStorage.getItem(LS_KEY + '_sig_WIT') || null;
-  return state;
-}
-function saveToLocal(){
-  const state = gatherFormState();
-  localStorage.setItem(LS_KEY, JSON.stringify(state));
-  showSaved();
-}
-function loadFromLocal(){
-  const raw = localStorage.getItem(LS_KEY);
-  if(!raw) return;
-  try{
-    const state = JSON.parse(raw);
-    inputsToWatch.forEach(id => {
-      const el = $(id);
-      if(el && state[id] !== undefined) el.value = state[id];
-    });
-    // policies
-    if(state.policies && Array.isArray(state.policies)){
-      policiesContainer.innerHTML = '';
-      policyCount = 0;
-      state.policies.forEach(p => createPolicyBlock(p));
-    }
-    if(state.sig_PO) updateSigPreview('PO', state.sig_PO);
-    if(state.sig_WIT) updateSigPreview('WIT', state.sig_WIT);
-  }catch(e){
-    console.warn('failed to parse saved state', e);
-  }
-}
-
-function debounce(fn, t=200){
-  let to;
-  return function(...a){ clearTimeout(to); to=setTimeout(()=> fn.apply(this,a), t); };
-}
-
-/* attach autosave listeners */
-inputsToWatch.forEach(id => {
-  const el = $(id);
-  if(el) el.addEventListener('input', debounce(saveToLocal, 300));
-});
-
-/* manual save/download JSON */
-$('saveLocalBtn').addEventListener('click', ()=> { saveToLocal(); alert('Saved to localStorage'); });
-$('downloadJson').addEventListener('click', ()=>{
-  const blob = new Blob([localStorage.getItem(LS_KEY) || '{}'], {type:'application/json'});
-  const url = URL.createObjectURL(blob);
-  const a = document.createElement('a'); a.href = url; a.download = 'amendment_lf1042_backup.json'; document.body.appendChild(a); a.click(); a.remove();
-});
-
-/* Reset */
-$('resetBtn').addEventListener('click', ()=>{
-  if(!confirm('Clear all saved data and reset the form?')) return;
-  localStorage.removeItem(LS_KEY);
-  localStorage.removeItem(LS_KEY + '_sig_PO');
-  localStorage.removeItem(LS_KEY + '_sig_WIT');
-  // clear UI
-  inputsToWatch.forEach(id=> { if($(id)) $(id).value=''; });
-  policiesContainer.innerHTML=''; policyCount=0;
-  updateSigPreview('PO', null); updateSigPreview('WIT', null);
-});
-
-/* initialize */
-loadFromLocal(); showSaved(); // show briefly
-
-/* ---------- PDF filling & signature embedding ---------- */
-
-/*
-  Signature coordinate constants (tweak these to match your PDF)
-  - The units are PDF points (1/72 inch). We draw on page 0 (first page).
-  - You must tune these for your LF1042 PDF. These are defaults that may need adjustment.
-  - Document here so you can change later:
-*/
-const SIGN_COORDS_PO = {
-  pageIndex: 0, // page number where signature goes (0-based)
-  x: 120,       // X offset in PDF points (from left)
-  y: 120,       // Y offset in PDF points (from bottom)
-  width: 160,   // width in PDF points
-  height: 60    // height in PDF points
-};
-
-const SIGN_COORDS_WIT = {
-  pageIndex: 0,
-  x: 320,
-  y: 120,
-  width: 160,
-  height: 60
-};
-
-/*
-  fillPdf:
-  - Loads the uploaded PDF (from file input).
-  - Sets form fields by name to the matching HTML input values.
-  - Embeds signature PNGs (if present) onto the selected page and flattens
-  - Returns a Blob for download (caller triggers download or preview)
-*/
-async function fillPdfBytes(originalPdfBytes){
-  const { PDFDocument } = PDFLib;
-  const pdfDoc = await PDFDocument.load(originalPdfBytes);
-  const form = pdfDoc.getForm ? pdfDoc.getForm() : null;
-  // populate fields if form exists
-  if(form){
-    const mapField = (fieldName, value) => {
-      try{
-        const f = form.getTextField(fieldName);
-        f.setText(value || '');
-      }catch(e){
-        try{ const f2 = form.getFieldMaybe(fieldName); if(f2 && f2.setText) f2.setText(value||''); }catch(e2){}
-        // Not all fields may exist; ignore missing
-      }
-    };
-    // Set the fields as requested
-    mapField('LifeProposed_Name', $('LifeProposed_Name').value || '');
-    mapField('PolicyNo', $('PolicyNo').value || '');
-    mapField('LifeProposed_NRIC', $('LifeProposed_NRIC').value || '');
-    mapField('Amendment_WriteDetails', $('Amendment_WriteDetails').value || '');
-    mapField('Signed_State', $('Signed_State').value || '');
-    mapField('Signed_Day', $('Signed_Day').value || '');
-    mapField('Signed_Month', $('Signed_Month').value || '');
-    mapField('Signed_Year', $('Signed_Year').value || '');
-    mapField('Sign_LifeProposedPO_Name', $('Sign_LifeProposedPO_Name').value || '');
-    mapField('Sign_Witness_Name', $('Sign_Witness_Name').value || '');
-    mapField('Sign_Witness_NRIC', $('Sign_Witness_NRIC').value || '');
-    // Additionally populate dynamic policy fields (if your PDF has them)
-    // Example: Policy1_No, Policy1_Name etc. (not guaranteed)
-    (function fillPoliciesToForm(){
-      const policies = [];
-      for(let i=1;i<=4;i++){
-        const el = $('policy_'+i);
-        if(el){
-          policies.push({
-            policyNo: $(`policy_no_${i}`)?.value || '',
-            name: $(`policy_name_${i}`)?.value || '',
-            anp: $(`policy_anp_${i}`)?.value || ''
-          });
+            // Years (last 100 years from current)
+            const currentYear = new Date().getFullYear();
+            for (let i = 0; i < 100; i++) {
+                const year = currentYear - i;
+                const option = document.createElement('option');
+                option.value = year.toString();
+                option.textContent = year.toString();
+                signedYearSelect.appendChild(option);
+            }
         }
-      }
-      policies.forEach((p, idx)=>{
-        const n = idx+1;
-        try{ form.getTextField(`Policy${n}_No`).setText(p.policyNo || ''); }catch(e){}
-        try{ form.getTextField(`Policy${n}_Name`).setText(p.name || ''); }catch(e){}
-        try{ form.getTextField(`Policy${n}_ANP`).setText(p.anp || ''); }catch(e){}
-      });
-    })();
-    // Flatten the form so fields become regular text
-    try{ form.flatten(); }catch(e){}
-  } else {
-    console.warn('PDF does not expose form API or pdf-lib could not find form fields. Attempting draw-only updates.');
-  }
+        populateDateDropdowns();
 
-  // embed signatures as images on pages (if present)
-  // PO signature
-  const sigPoDataUrl = localStorage.getItem(LS_KEY + '_sig_PO');
-  const sigWitDataUrl = localStorage.getItem(LS_KEY + '_sig_WIT');
+        // Autosave to localStorage
+        function saveForm() {
+            const formData = new FormData(form);
+            const data = {};
+            formData.forEach((value, key) => {
+                data[key] = value;
+            });
+            // Save signature data
+            data['Signature_LifeProposedPO'] = signaturePadLifeProposed.isEmpty() ? null : signaturePadLifeProposed.toDataURL();
+            data['Signature_Witness'] = signaturePadWitness.isEmpty() ? null : signaturePadWitness.toDataURL();
 
-  // Draw signature helper
-  async function drawSignature(dataUrl, coords){
-    if(!dataUrl) return;
-    const imgBytes = await fetch(dataUrl).then(r=>r.arrayBuffer());
-    const img = await pdfDoc.embedPng(imgBytes);
-    const pages = pdfDoc.getPages();
-    const pageIndex = Math.min(coords.pageIndex, pages.length-1);
-    const page = pages[pageIndex];
+            localStorage.setItem('amendmentFormData', JSON.stringify(data));
+        }
 
-    // PDF origin is bottom-left. coords.x,y are measured from left/bottom.
-    // We'll draw with specified width/height.
-    page.drawImage(img, {
-      x: coords.x,
-      y: coords.y,
-      width: coords.width,
-      height: coords.height,
-      rotate: undefined,
-      opacity: 1
-    });
-  }
+        // Autoload from localStorage
+        function loadForm() {
+            const savedData = localStorage.getItem('amendmentFormData');
+            if (savedData) {
+                const data = JSON.parse(savedData);
+                for (const key in data) {
+                    const element = document.getElementById(key);
+                    if (element) {
+                        element.value = data[key];
+                    }
+                }
+                // Load signatures
+                if (data['Signature_LifeProposedPO']) {
+                    signaturePadLifeProposed.fromDataURL(data['Signature_LifeProposedPO']);
+                }
+                if (data['Signature_Witness']) {
+                    signaturePadWitness.fromDataURL(data['Signature_Witness']);
+                }
+            }
+        }
 
-  // draw in sequence
-  await drawSignature(sigPoDataUrl, SIGN_COORDS_PO);
-  await drawSignature(sigWitDataUrl, SIGN_COORDS_WIT);
+        // Event listeners for autosave
+        form.addEventListener('input', saveForm);
+        signaturePadLifeProposed.onEnd = saveForm;
+        signaturePadWitness.onEnd = saveForm;
 
-  // Return bytes
-  const newPdfBytes = await pdfDoc.save();
-  return newPdfBytes;
-}
+        // Clear signature button listeners
+        document.querySelectorAll('.clear-btn').forEach(btn => {
+            btn.addEventListener('click', () => {
+                const canvasId = btn.getAttribute('data-canvas-id');
+                if (canvasId === 'Signature_LifeProposedPO') {
+                    signaturePadLifeProposed.clear();
+                } else if (canvasId === 'Signature_Witness') {
+                    signaturePadWitness.clear();
+                }
+                saveForm();
+            });
+        });
 
-/* ---------- UI actions for PDF ---------- */
+        // Reset button listener
+        resetBtn.addEventListener('click', () => {
+            form.reset();
+            signaturePadLifeProposed.clear();
+            signaturePadWitness.clear();
+            localStorage.removeItem('amendmentFormData');
+            alert('Form has been reset.');
+        });
 
-// file input
-let loadedPdfBytes = null;
-$('pdfFileInput').addEventListener('change', async (ev)=>{
-  const file = ev.target.files[0];
-  if(!file) return;
-  const arr = await file.arrayBuffer();
-  loadedPdfBytes = arr;
-  alert('PDF loaded. You can now Fill & Download.');
-});
+        // PDF Generation and Submission
+        previewAndSubmitBtn.addEventListener('click', async (e) => {
+            e.preventDefault();
+            const { PDFDocument, rgb, degrees } = PDFLib;
 
-// fill & download
-$('fillPdfBtn').addEventListener('click', async ()=>{
-  try{
-    if(!loadedPdfBytes){ alert('Please upload the LF1042 fillable PDF using the file input first.'); return; }
-    saveToLocal(); // ensure latest saved
-    const outBytes = await fillPdfBytes(loadedPdfBytes);
-    const blob = new Blob([outBytes], {type:'application/pdf'});
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a'); a.href = url; a.download = 'Amendment_to_Application_filled.pdf'; document.body.appendChild(a); a.click(); a.remove();
-  }catch(err){
-    console.error(err);
-    alert('Failed to fill PDF: ' + (err && err.message ? err.message : String(err)));
-  }
-});
+            const formUrl = 'Amendment to Application_LF1042_fillable.pdf';
+            const formPdfBytes = await fetch(formUrl).then(res => res.arrayBuffer());
 
-// preview (open in new tab)
-$('previewPdfBtn').addEventListener('click', async ()=>{
-  try{
-    if(!loadedPdfBytes){ alert('Upload LF1042 PDF first'); return; }
-    saveToLocal();
-    const outBytes = await fillPdfBytes(loadedPdfBytes);
-    const blob = new Blob([outBytes], {type:'application/pdf'});
-    const url = URL.createObjectURL(blob);
-    window.open(url, '_blank');
-  }catch(err){
-    console.error(err);
-    alert('Preview failed: ' + (err && err.message ? err.message : String(err)));
-  }
-});
+            const pdfDoc = await PDFDocument.load(formPdfBytes, { ignoreEncryption: true });
 
-/* ---------- load saved sigs previews on startup ---------- */
-(function loadSigPreviewsInit(){
-  const sPO = localStorage.getItem(LS_KEY + '_sig_PO');
-  const sW = localStorage.getItem(LS_KEY + '_sig_WIT');
-  if(sPO) updateSigPreview('PO', sPO);
-  if(sW) updateSigPreview('WIT', sW);
-})();
+            const formFields = pdfDoc.getForm();
+            
+            // Get form values
+            const formData = new FormData(form);
+            const data = Object.fromEntries(formData.entries());
 
-/* ---------- small UX helpers ---------- */
-// click outside modal to close (like reference)
-sigModal.addEventListener('click', (e)=>{
-  if(e.target === sigModal) closeSignatureModal();
-});
-</script>
+            // Fill PDF form fields
+            for (const key in data) {
+                try {
+                    const field = formFields.getTextField(key);
+                    if (field) {
+                        field.setText(data[key]);
+                    }
+                } catch (error) {
+                    console.warn(`Could not set field: ${key}`, error);
+                }
+            }
+
+            // Embed signatures
+            const signatureDataUrlLifeProposed = signaturePadLifeProposed.toDataURL('image/png');
+            if (!signaturePadLifeProposed.isEmpty()) {
+                const pngImageBytes = await fetch(signatureDataUrlLifeProposed).then(res => res.arrayBuffer());
+                const pngImage = await pdfDoc.embedPng(pngImageBytes);
+                const pages = pdfDoc.getPages();
+                const firstPage = pages[0];
+                
+                // Signature of Proposed Life Insured/Policyowner
+                // x, y, width, height for the signature image
+                // These coordinates need to be adjusted based on the actual PDF layout
+                // To find the right coordinates, you can use a PDF editor to get the coordinates of the signature field.
+                const { width, height } = pngImage.scale(0.25);
+                firstPage.drawImage(pngImage, {
+                    x: 100, // X-coordinate of the signature
+                    y: 200, // Y-coordinate of the signature
+                    width: width,
+                    height: height,
+                    rotate: degrees(0)
+                });
+            }
+
+            const signatureDataUrlWitness = signaturePadWitness.toDataURL('image/png');
+            if (!signaturePadWitness.isEmpty()) {
+                const pngImageBytes = await fetch(signatureDataUrlWitness).then(res => res.arrayBuffer());
+                const pngImage = await pdfDoc.embedPng(pngImageBytes);
+                const pages = pdfDoc.getPages();
+                const firstPage = pages[0];
+
+                // Signature of Witness
+                // x, y, width, height for the signature image
+                // These coordinates need to be adjusted based on the actual PDF layout
+                const { width, height } = pngImage.scale(0.25);
+                firstPage.drawImage(pngImage, {
+                    x: 400, // X-coordinate of the signature
+                    y: 200, // Y-coordinate of the signature
+                    width: width,
+                    height: height,
+                    rotate: degrees(0)
+                });
+            }
+
+            // Flatten the form
+            formFields.flatten();
+
+            const pdfBytes = await pdfDoc.save();
+            const blob = new Blob([pdfBytes], { type: 'application/pdf' });
+            const blobUrl = URL.createObjectURL(blob);
+
+            // Show PDF in modal
+            pdfPreviewContainer.innerHTML = '';
+            const iframe = document.createElement('iframe');
+            iframe.src = blobUrl;
+            iframe.style.width = '100%';
+            iframe.style.height = '100%';
+            iframe.style.border = 'none';
+            pdfPreviewContainer.appendChild(iframe);
+
+            pdfModal.style.display = 'block';
+
+            // Download PDF
+            downloadPdfBtn.onclick = () => {
+                const link = document.createElement('a');
+                link.href = blobUrl;
+                link.download = 'Amendment_to_Application_Filled.pdf';
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
+            };
+        });
+
+        // Close modal
+        modalCloseBtn.onclick = function() {
+            pdfModal.style.display = 'none';
+            pdfPreviewContainer.innerHTML = '';
+        }
+        window.onclick = function(event) {
+            if (event.target == pdfModal) {
+                pdfModal.style.display = 'none';
+                pdfPreviewContainer.innerHTML = '';
+            }
+        }
+
+        // Initial load
+        window.addEventListener('load', loadForm);
+    </script>
 </body>
 </html>
