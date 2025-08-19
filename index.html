@@ -528,6 +528,7 @@ async function generatePDF(){
   setText('Signed_Day', appState.Signed_Day);
   setText('Signed_Month', appState.Signed_Month);
   setText('Signed_Year', appState.Signed_Year);
+  setText('Sign_Witness_Name', appState.Sign_Witness_Name);
 
   // Flatten fields
   try{ form.flatten(); }catch(e){ console.warn('Flatten warning:', e); }
