@@ -448,13 +448,20 @@ function openSig(target){
   sigModal.style.display = 'block';
   document.body.style.overflow = 'hidden';
   resizeSigCanvas();
-// load saved signature into canvas if exists
+
+  // load saved signature into canvas if exists
   const saved = localStorage.getItem(target === 'owner' ? SIG_OWNER_KEY : SIG_WITNESS_KEY);
   if(saved){
     const img = new Image();
     img.onload = ()=> {
       ctx.clearRect(0,0,sigCanvas.width,sigCanvas.height);
-      ctx.drawImage(img, 0, 0, sigCanvas.width, sigCanvas.height);
+      // scale to fit canvas while keeping aspect ratio
+      const scale = Math.min(sigCanvas.width / img.width, sigCanvas.height / img.height);
+      const w = img.width * scale;
+      const h = img.height * scale;
+      const x = (sigCanvas.width - w) / 2;
+      const y = (sigCanvas.height - h) / 2;
+      ctx.drawImage(img, x, y, w, h);
     };
     img.src = saved;
   }
