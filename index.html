@@ -434,12 +434,36 @@ function endDraw(){ drawing=false; }
 window.addEventListener('resize', resizeSigCanvas);
 
 function openSig(target){
-  sigTarget = target; // 'owner' or 'witness'
+  sigTarget = target;
   $('#sigTitle').textContent = `Draw Signature — ${target === 'owner' ? 'Owner/Policyowner' : 'Witness'}`;
   sigModal.style.display = 'block';
   document.body.style.overflow = 'hidden';
   resizeSigCanvas();
+
+  // New code to load and display existing signature
+  const key = target === 'owner' ? SIG_OWNER_KEY : SIG_WITNESS_KEY;
+  const dataUrl = localStorage.getItem(key);
+
+  if (dataUrl) {
+    const img = new Image();
+    img.onload = function() {
+      // Clear the canvas and then draw the stored image
+      // Note: The clear is needed because resizeSigCanvas() already clears it.
+      // We are just being explicit here.
+      clearSigCanvas(); 
+      // Calculate the aspect ratio to fit the image without distortion
+      const hRatio = sigCanvas.width / img.width;
+      const vRatio = sigCanvas.height / img.height;
+      const ratio = Math.min(hRatio, vRatio);
+      const centerShiftX = (sigCanvas.width - img.width * ratio) / 2;
+      const centerShiftY = (sigCanvas.height - img.height * ratio) / 2;
+      ctx.drawImage(img, 0, 0, img.width, img.height,
+                    centerShiftX, centerShiftY, img.width * ratio, img.height * ratio);
+    };
+    img.src = dataUrl;
+  }
 }
+
 function closeSig(){
   sigModal.style.display = 'none';
   document.body.style.overflow = '';
