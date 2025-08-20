@@ -205,15 +205,6 @@
     </div>
   </section>
 
-  <!-- SECTION: (Optional) Additional Policy Entries — preserves the reference's dynamic add/remove behavior -->
-  <section class="section" id="sectionA">
-    <h2>Additional Policy Entries (Optional)</h2>
-    <div id="policiesContainer" class="policy-grid"></div>
-    <div class="row">
-      <button id="addPolicy" type="button">+ Add Another Policy</button>
-      <small class="muted">Up to 4 policies (demo feature to mirror reference behavior)</small>
-    </div>
-  </section>
 
   <!-- SECTION: Actions + Preview -->
   <section class="section">
@@ -269,7 +260,6 @@ const showSaved = (() => {
 const FORM_KEY = 'LF1042_AMENDMENT_FORM_V1';
 const SIG_OWNER_KEY = 'LF1042_SIG_OWNER';
 const SIG_WITNESS_KEY = 'LF1042_SIG_WITNESS';
-const POLICIES_KEY = 'LF1042_POLICIES';
 
 /* =============================
    Populate day / month / year
@@ -327,58 +317,6 @@ $$('.persist').forEach(el=>{
   el.addEventListener('change', saveForm);
 });
 
-/* ================================================
-   Dynamic additional policy cards (mirror behavior)
-   ================================================ */
-const MAX_POLICIES = 4;
-$('#addPolicy').addEventListener('click', ()=> addPolicyCard());
-function addPolicyCard(prefill){
-  const wrap = document.createElement('div');
-  wrap.className = 'policy';
-  const idx = Date.now() + '_' + Math.random().toString(36).slice(2,7);
-
-  wrap.innerHTML = `
-    <h3>Policy <button class="remove-btn" type="button">Remove</button></h3>
-    <label>Policy No.
-      <input type="text" class="policy-no" placeholder="Policy number">
-    </label>
-    <label>Note / Context
-      <input type="text" class="policy-note" placeholder="(Optional) short note for this policy">
-    </label>
-  `;
-  $('#policiesContainer').appendChild(wrap);
-
-  const btn = $('.remove-btn', wrap);
-  btn.addEventListener('click', ()=>{
-    wrap.remove();
-    persistPolicies();
-  });
-
-  const inputs = $$('.policy-no, .policy-note', wrap);
-  inputs.forEach(inp => inp.addEventListener('input', persistPolicies));
-
-  // Prefill if provided
-  if(prefill){
-    inputs[0].value = prefill.no || '';
-    inputs[1].value = prefill.note || '';
-  }
-  persistPolicies();
-  enforcePolicyCap();
-}
-function enforcePolicyCap(){
-  const count = $$('.policy').length;
-  $('#addPolicy').disabled = count >= MAX_POLICIES;
-}
-function persistPolicies(){
-  const arr = $$('.policy').map(card=>{
-    return {
-      no: $('.policy-no', card).value || '',
-      note: $('.policy-note', card).value || ''
-    };
-  });
-  localStorage.setItem(POLICIES_KEY, JSON.stringify(arr));
-  enforcePolicyCap();
-}
 
 /* =======================
    Signature pad + modal
