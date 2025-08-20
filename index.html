@@ -635,6 +635,27 @@ $('#resetAll').addEventListener('click', ()=>{
   showSaved();
 });
 
+  // Amendment details characters per line limit
+const maxCharsPerLine = 80; // Example: Set your desired character limit per line
+
+const textArea = document.getElementById('Amendment_WriteDetails');
+
+textArea.addEventListener('input', () => {
+  const lines = textArea.value.split('\n');
+  
+  // Check each line and trim it if it exceeds the limit.
+  for (let i = 0; i < lines.length; i++) {
+    if (lines[i].length > maxCharsPerLine) {
+      lines[i] = lines[i].substring(0, maxCharsPerLine);
+    }
+  }
+  
+  // Re-join the lines and update the textarea's value.
+  textArea.value = lines.join('\n');
+});
+
+
+  
 /* ============
    INIT
    ============ */
