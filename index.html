@@ -6,8 +6,6 @@
 <meta name="viewport" content="width=device-width,initial-scale=1" />
 <!-- pdf-lib for filling & flattening -->
 <script src="https://unpkg.com/pdf-lib@1.17.1/dist/pdf-lib.min.js"></script>
-<!-- pdfjs-dist for preview -->
-<script src="https://unpkg.com/pdfjs-dist@3.11.174/build/pdf.min.js"></script>
 <style>
   :root{
     --bg:#f6f7f9; --card:#fff; --accent:#007aff; --muted:#666; --line:#e9e9ee;
@@ -478,23 +476,6 @@ $('#sigDone').addEventListener('click', ()=>{
 $('#sigClear').addEventListener('click', ()=> clearSigCanvas());
 $('#sigCancel').addEventListener('click', ()=> closeSig());
 
-/* ==============
-   PDF PREVIEW
-   ============== */
-const pdfjsLib = window['pdfjs-dist/build/pdf'];
-pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://unpkg.com/pdfjs-dist@3.11.174/build/pdf.worker.min.js';
-
-async function renderPreview(bytes){
-  const canvas = $('#pdfPreviewCanvas');
-  const ctx2d = canvas.getContext('2d');
-  const pdf = await pdfjsLib.getDocument({data: bytes}).promise;
-  const page = await pdf.getPage(1);
-  const viewport = page.getViewport({ scale: 1.2 });
-  canvas.width = viewport.width;
-  canvas.height = viewport.height;
-  const renderContext = { canvasContext: ctx2d, viewport };
-  await page.render(renderContext).promise;
-}
 
 /* =========================
    PDF FILL / MAP / FLATTEN
@@ -626,9 +607,6 @@ $('#resetAll').addEventListener('click', ()=>{
   $('#policiesContainer').innerHTML = '';
   addPolicyCard();
 
-  // Clear preview
-  const ctx2d = $('#pdfPreviewCanvas').getContext('2d');
-  ctx2d.clearRect(0,0, $('#pdfPreviewCanvas').width, $('#pdfPreviewCanvas').height);
 
   showSaved();
 });
