@@ -451,36 +451,41 @@ function openSig(target){
 
   // load saved signature into canvas if exists
   const saved = localStorage.getItem(target === 'owner' ? SIG_OWNER_KEY : SIG_WITNESS_KEY);
-  if(saved){
-    const img = new Image();
-    img.onload = ()=> {
-      ctx.clearRect(0,0,sigCanvas.width,sigCanvas.height);
-      // scale to fit canvas while keeping aspect ratio
-      const scale = Math.min(sigCanvas.width / img.width, sigCanvas.height / img.height);
-      const w = img.width * scale;
-      const h = img.height * scale;
-      const x = (sigCanvas.width - w) / 2;
-      const y = (sigCanvas.height - h) / 2;
-      ctx.drawImage(img, x, y, w, h);
-    };
-    img.src = saved;
-  }
+if(saved){
+  const parsed = JSON.parse(saved);
+  const img = new Image();
+  img.onload = ()=> {
+    ctx.clearRect(0,0,sigCanvas.width,sigCanvas.height);
+    const scale = Math.min(sigCanvas.width / parsed.w, sigCanvas.height / parsed.h);
+    const w = parsed.w * scale;
+    const h = parsed.h * scale;
+    const x = (sigCanvas.width - w) / 2;
+    const y = (sigCanvas.height - h) / 2;
+    ctx.drawImage(img, x, y, w, h);
+  };
+  img.src = parsed.img;
 }
+  
 function closeSig(){
   sigModal.style.display = 'none';
   document.body.style.overflow = '';
 }
 
-function setSigPreview(target, dataUrl, persist=true){
-  const box = target === 'owner' ? $('#OwnerSigPreview') : $('#WitnessSigPreview');
-  box.innerHTML = '';
-  const img = new Image();
-  img.src = dataUrl;
-  box.appendChild(img);
-  if(persist){
-    localStorage.setItem(target === 'owner' ? SIG_OWNER_KEY : SIG_WITNESS_KEY, dataUrl);
-    showSaved();
+function setSigPreview(target, savedData, save){
+  const parsed = typeof savedData === 'string' ? JSON.parse(savedData) : savedData;
+  const { img, w, h } = parsed;
+
+  if(save){
+    localStorage.setItem(
+      target === 'owner' ? SIG_OWNER_KEY : SIG_WITNESS_KEY,
+      JSON.stringify(parsed)
+    );
   }
+
+  const previewEl = document.getElementById(
+    target === 'owner' ? 'sigOwnerPreview' : 'sigWitnessPreview'
+  );
+  previewEl.src = img;
 }
 
 $('#OwnerSigPreview').addEventListener('click', ()=> openSig('owner'));
@@ -497,8 +502,12 @@ $('#WitnessSigClear').addEventListener('click', ()=>{
 });
 
 $('#sigDone').addEventListener('click', ()=>{
-  const dataUrl = sigCanvas.toDataURL('image/png');
-  if(sigTarget) setSigPreview(sigTarget, dataUrl, true);
+  const savedData = JSON.stringify({
+    img: sigCanvas.toDataURL('image/png'),
+    w: sigCanvas.width,
+    h: sigCanvas.height
+  });
+  if(sigTarget) setSigPreview(sigTarget, savedData, true);
   closeSig();
 });
 $('#sigClear').addEventListener('click', ()=> clearSigCanvas());
