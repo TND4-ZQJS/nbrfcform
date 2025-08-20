@@ -324,7 +324,16 @@ function loadForm(){
 }
 function saveForm(){
   const data = {};
+  // Save text/checkbox inputs
   $$('.persist').forEach(inp=> data[inp.id] = inp.value);
+
+  // Save signatures (from preview <img> if you’re using setSigPreview)
+  const owner = localStorage.getItem(SIG_OWNER_KEY);
+  if (owner) data['sig_owner'] = owner;
+
+  const witness = localStorage.getItem(SIG_WITNESS_KEY);
+  if (witness) data['sig_witness'] = witness;
+
   localStorage.setItem(FORM_KEY, JSON.stringify(data));
   showSaved();
 }
