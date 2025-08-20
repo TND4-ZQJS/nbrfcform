@@ -533,7 +533,9 @@ async function generatePdf(){
   setText('LifeProposed_Name', 'LifeProposed_Name');
   setText('PolicyNo', 'PolicyNo');
   setText('LifeProposed_NRIC', 'LifeProposed_NRIC');
-  setText('Amendment_WriteDetails', 'Amendment_WriteDetails');
+  const amendmentField = form.getTextField('Amendment_WriteDetails');
+  amendmentField.enableMultiline(); // <--- Add this line
+  amendmentField.setText(mapVal('Amendment_WriteDetails'));
 
   setSelectText('Signed_State', 'Signed_State');
   setSelectText('Signed_Day', 'Signed_Day');
