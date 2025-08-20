@@ -448,6 +448,16 @@ function openSig(target){
   sigModal.style.display = 'block';
   document.body.style.overflow = 'hidden';
   resizeSigCanvas();
+// load saved signature into canvas if exists
+  const saved = localStorage.getItem(target === 'owner' ? SIG_OWNER_KEY : SIG_WITNESS_KEY);
+  if(saved){
+    const img = new Image();
+    img.onload = ()=> {
+      ctx.clearRect(0,0,sigCanvas.width,sigCanvas.height);
+      ctx.drawImage(img, 0, 0, sigCanvas.width, sigCanvas.height);
+    };
+    img.src = saved;
+  }
 }
 function closeSig(){
   sigModal.style.display = 'none';
