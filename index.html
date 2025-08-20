@@ -636,24 +636,32 @@ $('#resetAll').addEventListener('click', ()=>{
 });
 
   // Amendment details characters per line limit
-const maxCharsPerLine = 80; // Example: Set your desired character limit per line
+const maxCharsPerLine = 100; // Set your desired character limit per line
 
 const textArea = document.getElementById('Amendment_WriteDetails');
 
 textArea.addEventListener('input', () => {
   const lines = textArea.value.split('\n');
-  
-  // Check each line and trim it if it exceeds the limit.
-  for (let i = 0; i < lines.length; i++) {
-    if (lines[i].length > maxCharsPerLine) {
-      lines[i] = lines[i].substring(0, maxCharsPerLine);
-    }
-  }
-  
-  // Re-join the lines and update the textarea's value.
-  textArea.value = lines.join('\n');
-});
+  const lastLine = lines[lines.length - 1];
 
+  // If the last line exceeds the character limit
+  if (lastLine.length > maxCharsPerLine) {
+    const newLines = [...lines];
+    const lastLineIndex = newLines.length - 1;
+
+    // Get the part of the line that's too long
+    const overflow = lastLine.substring(maxCharsPerLine);
+    
+    // Trim the last line to the limit
+    newLines[lastLineIndex] = lastLine.substring(0, maxCharsPerLine);
+    
+    // Add the overflow as a new line
+    newLines.push(overflow);
+
+    // Update the textarea with the new lines
+    textArea.value = newLines.join('\n');
+  }
+});
 
   
 /* ============
