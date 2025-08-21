@@ -1,12 +1,10 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
 <meta charset="utf-8" />
 <title>Amendment to Application — Web Filler (LF1042)</title>
 <meta name="viewport" content="width=device-width,initial-scale=1" />
-<!-- pdf-lib for filling & flattening -->
 <script src="https://unpkg.com/pdf-lib@1.17.1/dist/pdf-lib.min.js"></script>
-<!-- pdfjs-dist for preview -->
 <script src="https://unpkg.com/pdfjs-dist@3.11.174/build/pdf.min.js"></script>
 <style>
   :root{
@@ -80,7 +78,6 @@
 <main>
   <h1>Amendment to Application (LF1042)</h1>
 
-  <!-- SECTION: Proposed Life Insured Info -->
   <section class="section">
     <h2>Proposed Life Insured Info</h2>
 
@@ -98,7 +95,6 @@
     </div>
   </section>
 
-  <!-- SECTION: Details of Amendment -->
   <section class="section">
     <h2>Details of Amendment</h2>
     <label>Write details here
@@ -106,14 +102,12 @@
     </label>
   </section>
 
-  <!-- SECTION: Signature Details (Date/Place) -->
   <section class="section">
     <h2>Signature Details</h2>
     <div class="row">
       <label style="flex:1">Signed at (State)
         <select id="Signed_State" class="persist">
           <option value="">-- Select State --</option>
-          <!-- Same label set used in your reference -->
           <option>Johor</option><option>Kedah</option><option>Kelantan</option><option>Melaka</option>
           <option>Negeri Sembilan</option><option>Pahang</option><option>Penang</option><option>Perak</option>
           <option>Perlis</option><option>Sabah</option><option>Sarawak</option><option>Selangor</option>
@@ -140,7 +134,6 @@
     </div>
   </section>
 
-  <!-- SECTION: Owner/Policyowner Signature -->
   <section class="section">
     <h2>Signature of Proposed Life Insured / Policyowner</h2>
     <div class="row">
@@ -170,7 +163,6 @@
       </div>
     </div>
 
-    <!-- OPTIONAL: tuning inputs (documented coordinates) -->
     <div class="hidden-inputs">
       <label>Owner Sig X <input id="OwnerSigX" type="number" step="1"></label>
       <label>Owner Sig Y <input id="OwnerSigY" type="number" step="1"></label>
@@ -178,7 +170,6 @@
     </div>
   </section>
 
-  <!-- SECTION: Witness Signature -->
   <section class="section">
     <h2>Signature of Witness</h2>
     <div class="row">
@@ -201,7 +192,6 @@
       </div>
     </div>
 
-    <!-- OPTIONAL: tuning inputs -->
     <div class="hidden-inputs">
       <label>Witness Sig X <input id="WitnessSigX" type="number" step="1"></label>
       <label>Witness Sig Y <input id="WitnessSigY" type="number" step="1"></label>
@@ -209,7 +199,6 @@
     </div>
   </section>
 
-  <!-- SECTION: (Optional) Additional Policy Entries — preserves the reference's dynamic add/remove behavior -->
   <section class="hidden-inputs" id="sectionA">
     <h2>Additional Policy Entries (Optional)</h2>
     <div id="policiesContainer" class="policy-grid"></div>
@@ -219,7 +208,6 @@
     </div>
   </section>
 
-  <!-- SECTION: Actions + Preview -->
   <section class="section">
     <h2>Preview & Output</h2>
     <div class="row actions">
@@ -233,7 +221,6 @@
   </section>
 </main>
 
-<!-- Signature Modal -->
 <div id="sigModal" class="sig-modal" role="dialog" aria-modal="true" aria-labelledby="sigTitle">
   <div class="box">
     <h3 id="sigTitle">Draw Signature</h3>
@@ -502,6 +489,8 @@ async function renderPreview(bytes){
    PDF FILL / MAP / FLATTEN
    ========================= */
 async function generatePdf(){
+  $('#genPdf').disabled = true;
+
   // Load base PDF
   const pdfUrl = 'Amendment to Application_LF1042_fillable.pdf';
   let existingPdfBytes;
@@ -515,7 +504,7 @@ async function generatePdf(){
   }
 
   // Prepare pdf-lib
-  const { PDFDocument, rgb } = PDFLib;
+  const { PDFDocument } = PDFLib;
   const pdfDoc = await PDFDocument.load(existingPdfBytes);
   const form = pdfDoc.getForm();
 
@@ -523,12 +512,12 @@ async function generatePdf(){
   const mapVal = (id) => ($('#'+id)?.value ?? '');
   const setText = (pdfFieldName, id) => {
     const field = form.getTextField(pdfFieldName);
-    field.setText(mapVal(id));
+    if (field) field.setText(mapVal(id));
   };
   const setSelectText = (pdfFieldName, id) => {
     const val = mapVal(id);
     const field = form.getTextField(pdfFieldName);
-    field.setText(val);
+    if (field) field.setText(val);
   };
 
   // Required mappings
@@ -536,8 +525,10 @@ async function generatePdf(){
   setText('PolicyNo', 'PolicyNo');
   setText('LifeProposed_NRIC', 'LifeProposed_NRIC');
   const amendmentField = form.getTextField('Amendment_WriteDetails');
-  amendmentField.enableMultiline(); // <--- Add this line
-  amendmentField.setText(mapVal('Amendment_WriteDetails'));
+  if (amendmentField) {
+      amendmentField.enableMultiline();
+      amendmentField.setText(mapVal('Amendment_WriteDetails'));
+  }
 
   setSelectText('Signed_State', 'Signed_State');
   setSelectText('Signed_Day', 'Signed_Day');
@@ -550,41 +541,62 @@ async function generatePdf(){
   setText('Sign_Witness_Name', 'Sign_Witness_Name');
   setText('Sign_Witness_NRIC', 'Sign_Witness_NRIC');
 
-  // Flatten all form fields first
-  form.flatten();
-
   // Embed signatures (Owner & Witness)
   const page = pdfDoc.getPages()[0];
-
-  // Get signature images from localStorage
   const ownerSigDataUrl = localStorage.getItem(SIG_OWNER_KEY);
   const witnessSigDataUrl = localStorage.getItem(SIG_WITNESS_KEY);
 
-  // OPTIONAL: use hidden inputs to override XY/SCALE
-  const ownerXY = {
-    X: useHiddenSigInputs && $('#OwnerSigX').value ? parseFloat($('#OwnerSigX').value) : OWNER_SIG.X,
-    Y: useHiddenSigInputs && $('#OwnerSigY').value ? parseFloat($('#OwnerSigY').value) : OWNER_SIG.Y,
-    SCALE_PCT: useHiddenSigInputs && $('#OwnerSigScale').value ? parseFloat($('#OwnerSigScale').value) : OWNER_SIG.SCALE_PCT
-  };
-  const witnessXY = {
-    X: useHiddenSigInputs && $('#WitnessSigX').value ? parseFloat($('#WitnessSigX').value) : WITNESS_SIG.X,
-    Y: useHiddenSigInputs && $('#WitnessSigY').value ? parseFloat($('#WitnessSigY').value) : WITNESS_SIG.Y,
-    SCALE_PCT: useHiddenSigInputs && $('#WitnessSigScale').value ? parseFloat($('#WitnessSigScale').value) : WITNESS_SIG.SCALE_PCT
+  // Unified function to handle signature embedding with scaling
+  const drawImageWithScaling = async (sigDataUrl, posX, posY, factor, previewElId) => {
+    if (!sigDataUrl) return;
+
+    try {
+      const img = await pdfDoc.embedPng(sigDataUrl);
+      const { width, height } = img.size();
+
+      const previewEl = document.getElementById(previewElId);
+      const boxW = previewEl.offsetWidth;
+      const boxH = previewEl.offsetHeight;
+
+      const scale = Math.min(boxW / width, boxH / height);
+      let drawW = width * scale;
+      let drawH = height * scale;
+
+      drawW *= factor;
+      drawH *= factor;
+
+      page.drawImage(img, {
+        x: posX,
+        y: posY,
+        width: drawW,
+        height: drawH
+      });
+    } catch (e) {
+      console.error("Error embedding signature:", e);
+    }
   };
 
-  if(ownerSigDataUrl){
-    const ownerPng = await (await fetch(ownerSigDataUrl)).arrayBuffer();
-    const ownerImg = await pdfDoc.embedPng(ownerPng);
-    const dims = ownerImg.scale(ownerXY.SCALE_PCT/100);
-    page.drawImage(ownerImg, { x: ownerXY.X, y: ownerXY.Y, width: dims.width, height: dims.height });
-  }
-  if(witnessSigDataUrl){
-    const witPng = await (await fetch(witnessSigDataUrl)).arrayBuffer();
-    const witImg = await pdfDoc.embedPng(witPng);
-    const dims = witImg.scale(witnessXY.SCALE_PCT/100);
-    page.drawImage(witImg, { x: witnessXY.X, y: witnessXY.Y, width: dims.width, height: dims.height });
-  }
+  // Owner signature
+  await drawImageWithScaling(
+    ownerSigDataUrl,
+    OWNER_SIG.X,
+    OWNER_SIG.Y,
+    OWNER_SIG.SCALE_PCT / 100,
+    'OwnerSigPreview'
+  );
 
+  // Witness signature
+  await drawImageWithScaling(
+    witnessSigDataUrl,
+    WITNESS_SIG.X,
+    WITNESS_SIG.Y,
+    WITNESS_SIG.SCALE_PCT / 100,
+    'WitnessSigPreview'
+  );
+
+  // Flatten all form fields before saving
+  form.flatten();
+  
   // Save + preview
   const pdfBytes = await pdfDoc.save();
   renderPreview(pdfBytes);
@@ -632,7 +644,7 @@ $('#resetAll').addEventListener('click', ()=>{
 
   // Clear preview
   const ctx2d = $('#pdfPreviewCanvas').getContext('2d');
-  ctx2d.clearRect(0,0, $('#pdfPreviewCanvas').width, $('#pdfPreviewCanvas').height);
+  if (ctx2d) ctx2d.clearRect(0,0, $('#pdfPreviewCanvas').width, $('#pdfPreviewCanvas').height);
 
   showSaved();
 });
@@ -641,30 +653,30 @@ $('#resetAll').addEventListener('click', ()=>{
 const maxCharsPerLine = 95; // Set your desired character limit per line
 
 const textArea = document.getElementById('Amendment_WriteDetails');
+if (textArea) {
+  textArea.addEventListener('input', () => {
+    const lines = textArea.value.split('\n');
+    const lastLine = lines[lines.length - 1];
 
-textArea.addEventListener('input', () => {
-  const lines = textArea.value.split('\n');
-  const lastLine = lines[lines.length - 1];
+    // If the last line exceeds the character limit
+    if (lastLine.length > maxCharsPerLine) {
+      const newLines = [...lines];
+      const lastLineIndex = newLines.length - 1;
 
-  // If the last line exceeds the character limit
-  if (lastLine.length > maxCharsPerLine) {
-    const newLines = [...lines];
-    const lastLineIndex = newLines.length - 1;
+      // Get the part of the line that's too long
+      const overflow = lastLine.substring(maxCharsPerLine);
+      
+      // Trim the last line to the limit
+      newLines[lastLineIndex] = lastLine.substring(0, maxCharsPerLine);
+      
+      // Add the overflow as a new line
+      newLines.push(overflow);
 
-    // Get the part of the line that's too long
-    const overflow = lastLine.substring(maxCharsPerLine);
-    
-    // Trim the last line to the limit
-    newLines[lastLineIndex] = lastLine.substring(0, maxCharsPerLine);
-    
-    // Add the overflow as a new line
-    newLines.push(overflow);
-
-    // Update the textarea with the new lines
-    textArea.value = newLines.join('\n');
-  }
-});
-
+      // Update the textarea with the new lines
+      textArea.value = newLines.join('\n');
+    }
+  });
+}
   
 /* ============
    INIT
