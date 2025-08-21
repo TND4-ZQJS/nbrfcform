@@ -611,6 +611,14 @@ async function generatePdf(){
   a.click();
   a.remove();
   setTimeout(()=> URL.revokeObjectURL(url), 1500);
+}catch (err) {
+    // Alert the user about the error
+    alert('PDF generation failed: ' + err.message);
+    console.error(err);
+  } finally {
+    // This line always runs, whether there's an error or not
+    $('#genPdf').disabled = false;
+  }
 }
 
 $('#genPdf').addEventListener('click', generatePdf);
