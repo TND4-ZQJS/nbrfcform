@@ -28,9 +28,7 @@
   button.ghost{background:transparent;border:1px solid var(--line);color:#333}
   .actions{display:flex;gap:12px;align-items:center}
 
-
-
-  /* Policy grid (for "additional policies" dynamic demo to mirror reference behavior) */
+  /* Policy grid */
   .policy-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
   .policy{background:#fff;padding:12px;border-radius:10px;border:1px solid #eee;position:relative}
   .policy h3{margin:0 0 8px 0;font-size:0.95rem;display:flex;align-items:center;justify-content:space-between}
@@ -52,11 +50,10 @@
     box-shadow:0 18px 50px rgba(0,0,0,.25)
   }
   .sig-modal h3{ margin:0 0 8px 0; }
-  /* NOTE: canvas is responsive via CSS; internal pixels are set in JS for crispness */
   #sigCanvas{ width:100%; height:220px; background:#fff; border:1px solid #ddd; border-radius:10px; touch-action:none }
   .sig-actions{ display:flex; gap:10px; justify-content:flex-end; margin-top:10px; }
 
-  /* Hidden signature XY tuning inputs (owner/witness) */
+  /* Hidden signature XY tuning inputs */
   .hidden-inputs {display: none;}
 
   /* Preview pane */
@@ -142,14 +139,12 @@
       </label>
     </div>
     <div class="row">
-    <label style="flex:1">IC No.
+      <label style="flex:1">IC No.
         <input id="Sign_LifeProposedPO_NRIC" class="persist" type="text" placeholder="e.g. 900101-14-1234">
-    </label>
-    <label style="flex:1">Mobile No.
+      </label>
+      <label style="flex:1">Mobile No.
         <input id="Sign_LifeProposedPO_Mobile" class="persist" type="text" placeholder="e.g. 012-3456789">
-    </label>
-</div>
-
+      </label>
     </div>
 
     <div class="row">
@@ -238,12 +233,10 @@
 <script>
 /* ============================================================
    RUNTIME CONSTANTS — Signature placement on the output PDF
-   Adjust these only when fine-tuning exact placement.
    Units: PDF points. Scale is a percentage of image width.
    ============================================================ */
-const OWNER_SIG = { X: 370, Y: 150, SCALE_PCT: 30 };   // <-- EDIT X/Y/SCALE for Owner signature
-const WITNESS_SIG = { X: 70, Y: 150, SCALE_PCT: 30 }; // <-- EDIT X/Y/SCALE for Witness signature
-// If you prefer to tweak via the hidden inputs, toggle `useHiddenSigInputs` to true.
+const OWNER_SIG = { X: 370, Y: 150, SCALE_PCT: 30 };   // tweak as needed
+const WITNESS_SIG = { X: 70,  Y: 150, SCALE_PCT: 30 }; // tweak as needed
 const useHiddenSigInputs = false;
 
 /* =============================
@@ -263,6 +256,7 @@ const showSaved = (() => {
 
 const FORM_KEY = 'LF1042_AMENDMENT_FORM_V1';
 const SIG_OWNER_KEY = 'LF1042_SIG_OWNER';
+the_owner_key = SIG_OWNER_KEY; // keeps 1:1 naming but avoids minifier issues
 const SIG_WITNESS_KEY = 'LF1042_SIG_WITNESS';
 const POLICIES_KEY = 'LF1042_POLICIES';
 
@@ -278,12 +272,8 @@ const POLICIES_KEY = 'LF1042_POLICIES';
     const opt=document.createElement('option'); opt.value=String(d).padStart(2,'0'); opt.textContent=String(d).padStart(2,'0');
     daySel.appendChild(opt);
   }
-  const months = [
-    'January','February','March','April','May','June','July','August','September','October','November','December'
-  ];
-  months.forEach((m,i)=>{
-    const opt=document.createElement('option'); opt.value=m; opt.textContent=m; monthSel.appendChild(opt);
-  });
+  const months = ['January','February','March','April','May','June','July','August','September','October','November','December'];
+  months.forEach((m)=>{ const opt=document.createElement('option'); opt.value=m; opt.textContent=m; monthSel.appendChild(opt); });
   const now = new Date();
   const yrStart = now.getFullYear()-1, yrEnd = now.getFullYear()+6;
   for(let y=yrStart; y<=yrEnd; y++){
@@ -330,8 +320,6 @@ $('#addPolicy').addEventListener('click', ()=> addPolicyCard());
 function addPolicyCard(prefill){
   const wrap = document.createElement('div');
   wrap.className = 'policy';
-  const idx = Date.now() + '_' + Math.random().toString(36).slice(2,7);
-
   wrap.innerHTML = `
     <h3>Policy <button class="remove-btn" type="button">Remove</button></h3>
     <label>Policy No.
@@ -352,7 +340,6 @@ function addPolicyCard(prefill){
   const inputs = $$('.policy-no, .policy-note', wrap);
   inputs.forEach(inp => inp.addEventListener('input', persistPolicies));
 
-  // Prefill if provided
   if(prefill){
     inputs[0].value = prefill.no || '';
     inputs[1].value = prefill.note || '';
@@ -366,10 +353,7 @@ function enforcePolicyCap(){
 }
 function persistPolicies(){
   const arr = $$('.policy').map(card=>{
-    return {
-      no: $('.policy-no', card).value || '',
-      note: $('.policy-note', card).value || ''
-    };
+    return { no: $('.policy-no', card).value || '', note: $('.policy-note', card).value || '' };
   });
   localStorage.setItem(POLICIES_KEY, JSON.stringify(arr));
   enforcePolicyCap();
@@ -386,14 +370,18 @@ const ctx = sigCanvas.getContext('2d', { willReadFrequently: true });
 // DPR-aware canvas sizing for crisp strokes
 function resizeSigCanvas(){
   const ratio = Math.max(window.devicePixelRatio || 1, 1);
-  sigCanvas.width = Math.floor(sigCanvas.getBoundingClientRect().width * ratio);
-  sigCanvas.height = Math.floor(sigCanvas.getBoundingClientRect().height * ratio);
+  const rect = sigCanvas.getBoundingClientRect();
+  sigCanvas.width = Math.floor(rect.width * ratio);
+  sigCanvas.height = Math.floor(rect.height * ratio);
+  // Reset transform, then scale for DPR
+  ctx.setTransform(1,0,0,1,0,0);
   ctx.scale(ratio, ratio);
   clearSigCanvas();
 }
 function clearSigCanvas(){
+  const rect = sigCanvas.getBoundingClientRect();
   ctx.fillStyle = '#fff';
-  ctx.fillRect(0,0,sigCanvas.width, sigCanvas.height);
+  ctx.fillRect(0,0,rect.width, rect.height);
   ctx.lineWidth = 2;
   ctx.lineCap = 'round';
   ctx.strokeStyle = '#111';
@@ -420,7 +408,31 @@ function endDraw(){ drawing=false; }
 ['mousemove','touchmove'].forEach(ev=> sigCanvas.addEventListener(ev, moveDraw, {passive:false}));
 ['mouseup','mouseleave','touchend','touchcancel'].forEach(ev=> sigCanvas.addEventListener(ev, endDraw));
 
-window.addEventListener('resize', resizeSigCanvas);
+window.addEventListener('resize', ()=> {
+  // Keep current image when resizing (e.g., orientation change)
+  const dataUrl = sigCanvas.toDataURL('image/png');
+  resizeSigCanvas();
+  drawDataURLOnSigCanvas(dataUrl);
+});
+
+/* NEW: draw previous signature dataURL into canvas (fit-to-canvas) */
+function drawDataURLOnSigCanvas(dataUrl){
+  if(!dataUrl) return;
+  const img = new Image();
+  img.onload = ()=>{
+    const rect = sigCanvas.getBoundingClientRect();
+    // Fit image inside visible CSS size (not pixel buffer)
+    const cw = rect.width, ch = rect.height;
+    const scale = Math.min(cw / img.width, ch / img.height);
+    const w = img.width * scale, h = img.height * scale;
+    const x = (cw - w) / 2, y = (ch - h) / 2;
+    // Clear to white then draw
+    clearSigCanvas();
+    // Since context is scaled for DPR, draw at CSS coordinates directly
+    ctx.drawImage(img, x, y, w, h);
+  };
+  img.src = dataUrl;
+}
 
 function openSig(target){
   sigTarget = target; // 'owner' or 'witness'
@@ -428,6 +440,15 @@ function openSig(target){
   sigModal.style.display = 'block';
   document.body.style.overflow = 'hidden';
   resizeSigCanvas();
+
+  // NEW: restore previous signature into the pad UI
+  const key = target === 'owner' ? SIG_OWNER_KEY : SIG_WITNESS_KEY;
+  const existing = localStorage.getItem(key);
+  if (existing) {
+    drawDataURLOnSigCanvas(existing);
+  } else {
+    clearSigCanvas();
+  }
 }
 function closeSig(){
   sigModal.style.display = 'none';
@@ -485,132 +506,138 @@ async function renderPreview(bytes){
   await page.render(renderContext).promise;
 }
 
+/* NEW: clear preview canvas to free memory before each run */
+function clearPreview(){
+  const canvas = $('#pdfPreviewCanvas');
+  if(!canvas) return;
+  const ctx2d = canvas.getContext('2d');
+  if(!ctx2d) return;
+  ctx2d.clearRect(0,0,canvas.width,canvas.height);
+  // shrink to help GC on mobile
+  canvas.width = 0;
+  canvas.height = 0;
+}
+
 /* =========================
    PDF FILL / MAP / FLATTEN
    ========================= */
 async function generatePdf(){
-  $('#genPdf').disabled = true;
-
-  // Load base PDF
-  const pdfUrl = 'Amendment to Application_LF1042_fillable.pdf';
-  let existingPdfBytes;
+  const btn = $('#genPdf');
+  btn.disabled = true;
   try{
+    // 0) Free previous preview memory (mobile stability)
+    clearPreview();
+
+    // 1) Always fetch a FRESH base PDF for each generation
+    const pdfUrl = 'Amendment to Application_LF1042_fillable.pdf';
     const res = await fetch(pdfUrl);
     if(!res.ok) throw new Error('PDF not found next to this HTML file.');
-    existingPdfBytes = await res.arrayBuffer();
-  }catch(err){
-    alert('Cannot load base PDF: ' + err.message);
-    return;
+    const existingPdfBytes = await res.arrayBuffer();
+
+    // 2) Load base PDF
+    const { PDFDocument } = PDFLib;
+    const pdfDoc = await PDFDocument.load(existingPdfBytes);
+    const form = pdfDoc.getForm();
+
+    // 3) Map fields
+    const mapVal = (id) => ($('#'+id)?.value ?? '');
+    const setText = (pdfFieldName, id) => {
+      const field = form.getTextField(pdfFieldName);
+      if (field) field.setText(mapVal(id));
+    };
+    const setSelectText = (pdfFieldName, id) => {
+      const val = mapVal(id);
+      const field = form.getTextField(pdfFieldName);
+      if (field) field.setText(val);
+    };
+
+    setText('LifeProposed_Name', 'LifeProposed_Name');
+    setText('PolicyNo', 'PolicyNo');
+    setText('LifeProposed_NRIC', 'LifeProposed_NRIC');
+
+    const amendmentField = form.getTextField('Amendment_WriteDetails');
+    if (amendmentField) { amendmentField.enableMultiline(); amendmentField.setText(mapVal('Amendment_WriteDetails')); }
+
+    setSelectText('Signed_State', 'Signed_State');
+    setSelectText('Signed_Day', 'Signed_Day');
+    setSelectText('Signed_Month', 'Signed_Month');
+    setSelectText('Signed_Year', 'Signed_Year');
+
+    setText('Sign_LifeProposedPO_Name', 'Sign_LifeProposedPO_Name');
+    setText('Sign_LifeProposedPO_NRIC', 'Sign_LifeProposedPO_NRIC');
+    setText('Sign_LifeProposedPO_Mobile', 'Sign_LifeProposedPO_Mobile');
+    setText('Sign_Witness_Name', 'Sign_Witness_Name');
+    setText('Sign_Witness_NRIC', 'Sign_Witness_NRIC');
+
+    // 4) Signatures (Owner & Witness)
+    const page = pdfDoc.getPages()[0];
+    const ownerSigDataUrl = localStorage.getItem(SIG_OWNER_KEY);
+    const witnessSigDataUrl = localStorage.getItem(SIG_WITNESS_KEY);
+
+    const drawImageWithScaling = async (sigDataUrl, posX, posY, factor, previewElId) => {
+      if (!sigDataUrl) return;
+      try {
+        const img = await pdfDoc.embedPng(sigDataUrl);
+        const { width, height } = img.size();
+
+        // Size based on preview box, then factor
+        const previewEl = document.getElementById(previewElId);
+        const boxW = previewEl ? previewEl.offsetWidth : width;
+        const boxH = previewEl ? previewEl.offsetHeight : height;
+
+        const scale = Math.min(boxW / width, boxH / height);
+        let drawW = width * scale * factor;
+        let drawH = height * scale * factor;
+
+        page.drawImage(img, { x: posX, y: posY, width: drawW, height: drawH });
+      } catch (e) {
+        console.error("Error embedding signature:", e);
+      }
+    };
+
+    // Owner signature
+    await drawImageWithScaling(
+      ownerSigDataUrl,
+      useHiddenSigInputs ? Number($('#OwnerSigX').value||OWNER_SIG.X) : OWNER_SIG.X,
+      useHiddenSigInputs ? Number($('#OwnerSigY').value||OWNER_SIG.Y) : OWNER_SIG.Y,
+      (useHiddenSigInputs ? (Number($('#OwnerSigScale').value)||OWNER_SIG.SCALE_PCT) : OWNER_SIG.SCALE_PCT) / 100,
+      'OwnerSigPreview'
+    );
+
+    // Witness signature
+    await drawImageWithScaling(
+      witnessSigDataUrl,
+      useHiddenSigInputs ? Number($('#WitnessSigX').value||WITNESS_SIG.X) : WITNESS_SIG.X,
+      useHiddenSigInputs ? Number($('#WitnessSigY').value||WITNESS_SIG.Y) : WITNESS_SIG.Y,
+      (useHiddenSigInputs ? (Number($('#WitnessSigScale').value)||WITNESS_SIG.SCALE_PCT) : WITNESS_SIG.SCALE_PCT) / 100,
+      'WitnessSigPreview'
+    );
+
+    // 5) Flatten and save
+    form.flatten();
+    const pdfBytes = await pdfDoc.save();
+
+    // 6) Preview
+    await renderPreview(pdfBytes);
+
+    // 7) Download
+    const blob = new Blob([pdfBytes], { type:'application/pdf' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = 'Amendment to Application — Web Filler (LF1042).pdf';
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+    setTimeout(()=> URL.revokeObjectURL(url), 1500);
+
+  } catch(err){
+    console.error('PDF generation failed:', err);
+    alert('Cannot generate PDF: ' + (err?.message || err));
+  } finally {
+    // Always re-enable button (prevents "dead" button on mobile)
+    $('#genPdf').disabled = false;
   }
-
-  // Prepare pdf-lib
-  const { PDFDocument } = PDFLib;
-  const pdfDoc = await PDFDocument.load(existingPdfBytes);
-  const form = pdfDoc.getForm();
-
-  // Map simple fields (HTML id -> PDF field name 1:1)
-  const mapVal = (id) => ($('#'+id)?.value ?? '');
-  const setText = (pdfFieldName, id) => {
-    const field = form.getTextField(pdfFieldName);
-    if (field) field.setText(mapVal(id));
-  };
-  const setSelectText = (pdfFieldName, id) => {
-    const val = mapVal(id);
-    const field = form.getTextField(pdfFieldName);
-    if (field) field.setText(val);
-  };
-
-  // Required mappings
-  setText('LifeProposed_Name', 'LifeProposed_Name');
-  setText('PolicyNo', 'PolicyNo');
-  setText('LifeProposed_NRIC', 'LifeProposed_NRIC');
-  const amendmentField = form.getTextField('Amendment_WriteDetails');
-  if (amendmentField) {
-      amendmentField.enableMultiline();
-      amendmentField.setText(mapVal('Amendment_WriteDetails'));
-  }
-
-  setSelectText('Signed_State', 'Signed_State');
-  setSelectText('Signed_Day', 'Signed_Day');
-  setSelectText('Signed_Month', 'Signed_Month');
-  setSelectText('Signed_Year', 'Signed_Year');
-
-  setText('Sign_LifeProposedPO_Name', 'Sign_LifeProposedPO_Name');
-  setText('Sign_LifeProposedPO_NRIC', 'Sign_LifeProposedPO_NRIC');
-  setText('Sign_LifeProposedPO_Mobile', 'Sign_LifeProposedPO_Mobile');
-  setText('Sign_Witness_Name', 'Sign_Witness_Name');
-  setText('Sign_Witness_NRIC', 'Sign_Witness_NRIC');
-
-  // Embed signatures (Owner & Witness)
-  const page = pdfDoc.getPages()[0];
-  const ownerSigDataUrl = localStorage.getItem(SIG_OWNER_KEY);
-  const witnessSigDataUrl = localStorage.getItem(SIG_WITNESS_KEY);
-
-  // Unified function to handle signature embedding with scaling
-  const drawImageWithScaling = async (sigDataUrl, posX, posY, factor, previewElId) => {
-    if (!sigDataUrl) return;
-
-    try {
-      const img = await pdfDoc.embedPng(sigDataUrl);
-      const { width, height } = img.size();
-
-      const previewEl = document.getElementById(previewElId);
-      const boxW = previewEl.offsetWidth;
-      const boxH = previewEl.offsetHeight;
-
-      const scale = Math.min(boxW / width, boxH / height);
-      let drawW = width * scale;
-      let drawH = height * scale;
-
-      drawW *= factor;
-      drawH *= factor;
-
-      page.drawImage(img, {
-        x: posX,
-        y: posY,
-        width: drawW,
-        height: drawH
-      });
-    } catch (e) {
-      console.error("Error embedding signature:", e);
-    }
-  };
-
-  // Owner signature
-  await drawImageWithScaling(
-    ownerSigDataUrl,
-    OWNER_SIG.X,
-    OWNER_SIG.Y,
-    OWNER_SIG.SCALE_PCT / 100,
-    'OwnerSigPreview'
-  );
-
-  // Witness signature
-  await drawImageWithScaling(
-    witnessSigDataUrl,
-    WITNESS_SIG.X,
-    WITNESS_SIG.Y,
-    WITNESS_SIG.SCALE_PCT / 100,
-    'WitnessSigPreview'
-  );
-
-  // Flatten all form fields before saving
-  form.flatten();
-  
-  // Save + preview
-  const pdfBytes = await pdfDoc.save();
-  renderPreview(pdfBytes);
-
-  // Download
-  const blob = new Blob([pdfBytes], { type:'application/pdf' });
-  const url = URL.createObjectURL(blob);
-  const a = document.createElement('a');
-  a.href = url;
-  a.download = 'Amendment to Application — Web Filler (LF1042).pdf';
-  document.body.appendChild(a);
-  a.click();
-  a.remove();
-  setTimeout(()=> URL.revokeObjectURL(url), 1500);
 }
 
 $('#genPdf').addEventListener('click', generatePdf);
@@ -643,41 +670,29 @@ $('#resetAll').addEventListener('click', ()=>{
   addPolicyCard();
 
   // Clear preview
-  const ctx2d = $('#pdfPreviewCanvas').getContext('2d');
-  if (ctx2d) ctx2d.clearRect(0,0, $('#pdfPreviewCanvas').width, $('#pdfPreviewCanvas').height);
+  clearPreview();
 
   showSaved();
 });
 
-  // Amendment details characters per line limit
-const maxCharsPerLine = 95; // Set your desired character limit per line
-
+  // Amendment details characters per line limit (kept 1:1)
+const maxCharsPerLine = 95;
 const textArea = document.getElementById('Amendment_WriteDetails');
 if (textArea) {
   textArea.addEventListener('input', () => {
     const lines = textArea.value.split('\n');
     const lastLine = lines[lines.length - 1];
-
-    // If the last line exceeds the character limit
     if (lastLine.length > maxCharsPerLine) {
       const newLines = [...lines];
       const lastLineIndex = newLines.length - 1;
-
-      // Get the part of the line that's too long
       const overflow = lastLine.substring(maxCharsPerLine);
-      
-      // Trim the last line to the limit
       newLines[lastLineIndex] = lastLine.substring(0, maxCharsPerLine);
-      
-      // Add the overflow as a new line
       newLines.push(overflow);
-
-      // Update the textarea with the new lines
       textArea.value = newLines.join('\n');
     }
   });
 }
-  
+
 /* ============
    INIT
    ============ */
