@@ -6,241 +6,761 @@
 <meta name="viewport" content="width=device-width,initial-scale=1" />
 <style>
   :root{
-    --bg:#f6f7f9;--card:#fff;--accent:#007aff;--muted:#666;
+    --bg:#f6f7f9; --card:#fff; --accent:#007aff; --muted:#666; --line:#e9e9ee;
   }
   *{box-sizing:border-box}
   body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Arial;margin:18px;background:var(--bg);color:#111}
-  main{max-width:980px;margin:0 auto;background:var(--card);padding:18px;border-radius:10px;box-shadow:0 8px 28px rgba(0,0,0,0.06)}
-  h1{margin-top:0;font-size:1.25rem}
-  .section{background:#fbfbfd;border:1px solid #eee;padding:12px;border-radius:8px;margin:12px 0}
-  .section h2{margin:0 0 8px 0}
+  main{max-width:980px;margin:0 auto;background:var(--card);padding:18px;border-radius:12px;box-shadow:0 8px 28px rgba(0,0,0,0.06)}
+  h1{margin:15px 0 35px 0;font-size:1.50rem}
+  .section{background:#fbfbfd;border:1px solid #eee;padding:14px;border-radius:10px;margin:12px 0}
+  .section h2{margin:0 0 10px 0;font-size:1.05rem}
   label{display:block;margin:8px 0;font-size:0.95rem}
-  input[type=text],select,textarea{width:100%;padding:8px;border-radius:8px;border:1px solid #ddd;margin-top:6px}
-  textarea{resize:none;overflow:hidden}
+  input[type=text],input[type=number],select,textarea{
+    width:100%;padding:10px;border-radius:10px;border:1px solid #ddd;margin-top:6px;font-size:1rem;background:#fff
+  }
+  textarea{resize:vertical;min-height:120px}
   .row{display:flex;gap:12px;align-items:center;flex-wrap:wrap;margin:8px 0}
-  button{background:var(--accent);color:#fff;border:0;padding:10px 14px;border-radius:8px;cursor:pointer}
+  .muted{color:var(--muted);font-size:0.85rem}
+  button{background:var(--accent);color:#fff;border:0;padding:10px 14px;border-radius:10px;cursor:pointer}
   button.secondary{background:#999}
+  button.ghost{background:transparent;border:1px solid var(--line);color:#333}
   .actions{display:flex;gap:12px;align-items:center}
-  canvas{width:100%;height:150px;border-radius:8px;border:1px solid #ddd;background:#fff}
-  footer{margin-top:12px;color:var(--muted)}
+
+.dropdown-with-button {
+  position: relative;
+  display: inline-block;
+  width: 100%;
+}
+
+/* Select box */
+.dropdown-with-button select {
+  width: 100%;
+  padding: 10px 80px 10px 12px; /* leave space for button */
+  border: 1px solid #ddd;
+  border-radius: 10px;          
+  font-size: 1rem;
+  appearance: none;
+  background-color: #fff;
+  transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+.dropdown-with-button select:focus {
+  outline: none;
+  border-color: var(--accent);
+  box-shadow: 0 0 0 2px rgba(0,122,255,0.2);
+}
+
+/* Insert button as egg shape */
+.dropdown-with-button button.insert {
+  position: absolute;
+  top: 50%;
+  right: 8px;               /* some spacing from edge */
+  transform: translateY(-50%); /* vertically center */
+  height: 28px;              /* fixed height for egg shape */
+  padding: 0 12px;           /* horizontal padding */
+  border: none;              /* seamless */
+  border-radius: 50px;       /* fully rounded (egg shape) */
+  background-color: #fff;    /* same as select */
+  color: var(--accent);
+  font-size: 0.85rem;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.12); /* subtle shadow */
+  transition: background 0.15s, transform 0.1s;
+}
+
+.dropdown-with-button button.insert:hover {
+  background-color: #f5f6fa;
+}
+
+.dropdown-with-button button.insert:active {
+  transform: translateY(-50%) scale(0.97);
+  box-shadow: 0 1px 2px rgba(0,0,0,0.1);
+}
+
+/* Adjust select padding to avoid overlap with egg button */
+.dropdown-with-button select {
+  width: 100%;
+  padding: 10px 100px 10px 12px; /* make room for egg button */
+  border: 1px solid #ddd;
+  border-radius: 10px;          
+  font-size: 1rem;
+  appearance: none;
+  background-color: #fff;
+  transition: border-color 0.2s, box-shadow 0.2s;
+}
+  
+  /* Policy grid (for "additional policies" dynamic demo to mirror reference behavior) */
+  .policy-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+  .policy{background:#fff;padding:12px;border-radius:10px;border:1px solid #eee;position:relative}
+  .policy h3{margin:0 0 8px 0;font-size:0.95rem;display:flex;align-items:center;justify-content:space-between}
+  .policy .remove-btn{background:transparent;border:1px solid var(--line);color:#333;border-radius:8px;padding:6px 10px;font-size:0.9rem}
+  .policy .remove-btn:hover{border-color:#d0d0d7}
+
+  /* Signature preview tiles */
+  .sig-preview{
+    width:100%; height:150px; border:1px dashed #bbb; border-radius:10px;
+    display:flex; align-items:center; justify-content:center; background:#fff; cursor:pointer; position:relative;
+  }
+  .sig-preview img{ max-width:100%; max-height:100%; object-fit:contain; }
+  .sig-preview span{ color:#999; }
+
+  /* Signature Modal */
+  .sig-modal{ display:none; position:fixed; inset:0; background:rgba(0,0,0,.45); z-index:1000; }
+  .sig-modal .box{
+    width:min(560px, 92vw); background:#fff; margin:6vh auto; padding:14px; border-radius:12px;
+    box-shadow:0 18px 50px rgba(0,0,0,.25)
+  }
+  .sig-modal h3{ margin:0 0 8px 0; }
+  /* NOTE: canvas is responsive via CSS; internal pixels are set in JS for crispness */
+  #sigCanvas{ width:100%; height:220px; background:#fff; border:1px solid #ddd; border-radius:10px; touch-action:none }
+  .sig-actions{ display:flex; gap:10px; justify-content:flex-end; margin-top:10px; }
+
+  /* Hidden signature XY tuning inputs (owner/witness) */
+  .hidden-inputs {display: none;}
+
+  /* Preview pane */
+  .preview{background:#fff;border:1px solid #eee;border-radius:10px;padding:10px}
+  .preview canvas{width:100%;height:auto;border-radius:8px}
+
+  /* Save indicator */
+  #saveStatus{
+    position:fixed; bottom:12px; right:12px; background:var(--accent); color:#fff;
+    padding:6px 10px; border-radius:8px; font-size:0.85rem; opacity:0; transition:opacity .25s;
+  }
+
+  @media (max-width:720px){
+    .policy-grid{grid-template-columns:1fr}
+  }
 </style>
 </head>
 <body>
 <main>
-<h1>Amendment to Application — Web Filler</h1>
+  <h1>Amendment to Application (LF1042)</h1>
 
-<!-- Section 1 -->
-<section class="section">
-<h2>Section 1 — Life Proposed Info</h2>
-<label>Name
-  <input id="LifeProposed_Name" type="text" placeholder="FULL NAME" oninput="this.value=this.value.toUpperCase()">
-</label>
-<label>NRIC
-  <input id="LifeProposed_NRIC" type="text" placeholder="e.g. 900101-01-1234">
-</label>
-<label>Policy No.
-  <input id="PolicyNo" type="text">
-</label>
-</section>
+  <!-- SECTION: Proposed Life Insured Info -->
+  <section class="section">
+    <h2>Proposed Life Insured Info</h2>
 
-<!-- Section 2 -->
-<section class="section">
-<h2>Section 2 — Details of Amendment</h2>
-<textarea id="Amendment_WriteDetails" placeholder="Describe the amendment in detail..." rows="5" oninput="autoResize(this)"></textarea>
-</section>
+    <label>Proposed Life Insured/Insured Name
+      <input id="LifeProposed_Name" class="persist" type="text" placeholder="AS IN I/C">
+    </label>
 
-<!-- Section 3 -->
-<section class="section">
-<h2>Section 3 — Signature & Policy Owner Info</h2>
+    <div class="row">
+      <label style="flex:1">Policy No. (single)
+        <input id="PolicyNo" class="persist" type="text" placeholder="Enter policy number">
+      </label>
+      <label style="flex:1">IC Number
+        <input id="LifeProposed_NRIC" class="persist" type="text" placeholder="e.g. 900101-14-1234">
+      </label>
+    </div>
+  </section>
 
-<label>Signed State</label>
-<select id="Signed_State">
-  <option value="">Select State</option>
-  <option>SELANGOR</option>
-  <option>K.LUMPUR</option>
-  <option>MELAKA</option>
-  <option>JOHOR</option>
-  <option>KEDAH</option>
-  <option>KELANTAN</option>
-  <option>NEGERI SEMBILAN</option>
-  <option>PAHANG</option>
-  <option>PENANG</option>
-  <option>PERAK</option>
-  <option>PERLIS</option>
-  <option>SABAH</option>
-  <option>SARAWAK</option>
-  <option>TERENGGANU</option>
-  <option>LABUAN</option>
-  <option>PUTRAJAYA</option>
-</select>
+  <!-- SECTION: Details of Amendment -->
+  <section class="section">
+    <h2>Details of Amendment</h2>
+    <label>Write details here
+      <textarea id="Amendment_WriteDetails" class="persist" rows="15" placeholder="Describe the amendment in detail..."></textarea>
+    </label>
 
-<div class="row">
-  <label>Day
-    <select id="Signed_Day"><option value="">Day</option></select>
-  </label>
-  <label>Month
-    <select id="Signed_Month"><option value="">Month</option></select>
-  </label>
-  <label>Year
-    <select id="Signed_Year"><option value="">Year</option></select>
-  </label>
+    <label>Common Amendment</label>
+<div class="dropdown-with-button">
+  <select id="Amendment_Common">
+    <option value="">-- Insert common amendment --</option>
+    <option>Kindly bill with EPP</option>
+    <option>Change Basic Face Amount</option>
+    <option>Change Beyond Critical Cover Face Amount</option>
+    <option>Change Accelerated CI Face Amount</option>
+    <option>Business Adress: Home Based</option>
+  </select>
+  <button type="button" class="insert">Insert</button>
 </div>
+  </section>
 
-<h3>Witness Info</h3>
-<div class="row">
-  <label>Name
-    <input id="Sign_Witness_Name" type="text">
-  </label>
-  <label>NRIC
-    <input id="Sign_Witness_NRIC" type="text">
-  </label>
+  <!-- SECTION: Signature Details (Date/Place) -->
+  <section class="section">
+    <h2>Signature Details</h2>
+    <div class="row">
+      <label style="flex:1">Signed at (State)
+        <select id="Signed_State" class="persist">
+          <option value="">-- Select State --</option>
+          <!-- Same label set used in your reference -->
+          <option>SELANGOR</option><option>K.LUMPUR</option><option>MELAKA</option><option>JOHOR</option>
+          <option>N.SEMBILAN</option><option>PENANG</option><option>PERAK</option><option>SABAH</option>
+          <option>SARAWAK</option><option>KELANTAN</option><option>PERLIS</option><option>T'GANU</option>
+          <option>PAHANG</option><option>KEDAH</option>
+        </select>
+      </label>
+    </div>
+    <div class="row">
+      <label style="flex:1">Day
+        <select id="Signed_Day" class="persist">
+          <option value="">-- Day (DD) --</option>
+          <option>01</option><option>02</option><option>03</option><option>04</option>
+          <option>05</option><option>06</option><option>07</option><option>08</option>
+          <option>09</option><option>10</option><option>11</option><option>12</option>
+          <option>13</option><option>14</option><option>15</option><option>16</option>
+          <option>17</option><option>18</option><option>19</option><option>20</option>
+          <option>21</option><option>22</option><option>23</option><option>24</option>
+          <option>25</option><option>26</option><option>27</option><option>28</option>
+          <option>29</option><option>30</option><option>31</option>
+        </select>
+      </label>
+      <label style="flex:1">Month
+        <select id="Signed_Month" class="persist">
+          <option value="">-- Month --</option>
+          <option>JANUARY</option><option>FEBRUARY</option><option>MARCH</option><option>APRIL</option>
+          <option>MAY</option><option>JUNE</option><option>JULY</option><option>AUGUST</option>
+          <option>SEPTEMBER</option><option>OCTOBER</option><option>NOVEMBER</option><option>DECEMBER</option>
+        </select>
+      </label>
+      <label style="flex:1">Year
+        <select id="Signed_Year" class="persist">
+          <option value="">-- Year (YYYY) --</option>
+          <option>2025</option><option>2026</option>
+        </select>
+      </label>
+    </div>
+  </section>
+
+  <!-- SECTION: Owner/Policyowner Signature -->
+  <section class="section">
+    <h2>Signature of Proposed Life Insured / Policyowner</h2>
+    <div class="row">
+      <label style="flex:1">Proposed Life Insured/Policyowner Name
+        <input id="Sign_LifeProposedPO_Name" class="persist" type="text" placeholder="AS IN I/C">
+      </label>
+    </div>
+    <div class="row">
+    <label style="flex:1">IC No.
+        <input id="Sign_LifeProposedPO_NRIC" class="persist" type="text" placeholder="e.g. 900101-14-1234">
+    </label>
+    <label style="flex:1">Mobile No.
+        <input id="Sign_LifeProposedPO_Mobile" class="persist" type="text" placeholder="e.g. 012-3456789">
+    </label>
+    </div>
+
+        <div class="sig-preview" id="preview_policyowner" onclick="openSig('policyowner')">
+      <span>Tap to Sign (Proposed Life Insured/Policyowner)</span>
+    </div>
+    <div class="row">
+      <button id="clearPreviewPolicyowner" class="secondary" type="button">Clear Signature</button>
+    </div>
+    
+
+  </section>
+
+  <!-- SECTION: Witness Signature -->
+  <section class="section">
+    <h2>Signature of Witness</h2>
+    <div class="row">
+      <label style="flex:1">Name of Witness
+        <input id="Sign_Witness_Name" class="persist" type="text" placeholder="AS IN I/C">
+      </label>
+      <label style="flex:1">IC No.
+        <input id="Sign_Witness_NRIC" class="persist" type="text" placeholder="e.g. 800202-08-5678">
+      </label>
+    </div>
+
+       <div class="sig-preview" id="preview_witness" onclick="openSig('witness')">
+      <span>Tap to Sign (Witness)</span>
+    </div>
+    <div class="row">
+      <button id="clearPreviewWitness" class="secondary" type="button">Clear Signature</button>
+    </div>
+
+    <section class="section actions">
+    <button id="generate">Generate PDF</button>
+    <button id="resetAll" class="secondary">Reset All</button>
+  </section>
+
+    <div id="sigModal" class="sig-modal" aria-hidden="true">
+  <div class="box">
+    <h3 id="sigModalTitle">Draw Signature</h3>
+    <!-- Responsive canvas: internal pixels are set in JS for crispness -->
+    <canvas id="sigCanvas"></canvas>
+    <div class="sig-actions">
+      <button id="sigDone" type="button">Done</button>
+      <button id="sigClear" type="button" class="ghost">Clear</button>
+      <button id="sigCancel" type="button" class="secondary">Cancel</button>
+    </div>
+  </div>
 </div>
-
-<h3>Policy Owner Info</h3>
-<label>
-  <input type="checkbox" id="sameAsLifeProposed" checked> Same as Life Proposed
-</label>
-<div class="row">
-  <label>Policy Owner Name
-    <input id="Sign_LifeProposedPO_Name" type="text">
-  </label>
-  <label>NRIC
-    <input id="Sign_LifeProposedPO_NRIC" type="text">
-  </label>
-  <label>Mobile
-    <input id="Sign_LifeProposedPO_Mobile" type="text">
-  </label>
-</div>
-
-<h3>Policy Owner Signature</h3>
-<canvas id="sigPolicyOwner"></canvas>
-<div class="row">
-  <button type="button" id="clearSigPolicyOwner" class="secondary">Clear Signature</button>
-</div>
-
-<h3>Witness Signature</h3>
-<canvas id="sigWitness"></canvas>
-<div class="row">
-  <button type="button" id="clearSigWitness" class="secondary">Clear Signature</button>
-</div>
-</section>
-
-<!-- Actions -->
-<section class="section actions">
-  <button id="generate">Generate PDF</button>
-  <button id="resetAll" class="secondary">Reset All</button>
-</section>
-
-<footer><small>Ensure <code>Amendment to Application_LF1042_fillable.pdf</code> is in the same folder as this HTML.</small></footer>
-</main>
+    <div id="saveStatus">Saved</div>
+  </section>
 
 <script src="https://unpkg.com/pdf-lib/dist/pdf-lib.min.js"></script>
 <script>
-// Auto-expand textarea
-function autoResize(t){t.style.height="auto";t.style.height=t.scrollHeight+"px";}
 
-// Populate day/month/year
-(function(){
-  const daySel=document.getElementById('Signed_Day');
-  for(let i=1;i<=31;i++){daySel.innerHTML+=`<option>${i}</option>`;}
-  const monthSel=document.getElementById('Signed_Month');
-  const months=["JANUARY","FEBRUARY","MARCH","APRIL","MAY","JUNE","JULY","AUGUST","SEPTEMBER","OCTOBER","NOVEMBER","DECEMBER"];
-  months.forEach(m=>monthSel.innerHTML+=`<option>${m}</option>`);
-  const yearSel=document.getElementById('Signed_Year');
-  const current=new Date().getFullYear();
-  for(let y=current;y>=current-5;y--){yearSel.innerHTML+=`<option>${y}</option>`;}
-})();
-
-// Same as Life Proposed toggle
-const sameCb=document.getElementById('sameAsLifeProposed');
-const poName=document.getElementById('Sign_LifeProposedPO_Name');
-const poNRIC=document.getElementById('Sign_LifeProposedPO_NRIC');
-const lifeName=document.getElementById('LifeProposed_Name');
-const lifeNRIC=document.getElementById('Lifeproposed_NRIC');
-sameCb.addEventListener('change',()=>{
-  if(sameCb.checked){
-    poName.value=lifeName.value;
-    poNRIC.value=lifeNRIC.value;
-    poName.readOnly=true;poNRIC.readOnly=true;
-  } else {poName.readOnly=false;poNRIC.readOnly=false;}
-});
-lifeName.addEventListener('input',()=>{if(sameCb.checked)poName.value=lifeName.value;});
-lifeNRIC.addEventListener('input',()=>{if(sameCb.checked)poNRIC.value=lifeNRIC.value;});
-
-// Signature setup
-function setupCanvas(id,clearId){
-  const c=document.getElementById(id),ctx=c.getContext("2d");
-  function resize(){
-    const ratio=window.devicePixelRatio||1;
-    c.width=c.offsetWidth*ratio;c.height=150*ratio;
-    ctx.setTransform(1,0,0,1,0,0);ctx.scale(ratio,ratio);
-    ctx.lineWidth=2;ctx.lineCap="round";ctx.strokeStyle="#000";
-  }
-  resize();window.addEventListener("resize",resize);
-  let draw=false;
-  function pos(e){const r=c.getBoundingClientRect();const x=(e.touches?e.touches[0].clientX:e.clientX)-r.left;const y=(e.touches?e.touches[0].clientY:e.clientY)-r.top;return{x,y};}
-  c.addEventListener("mousedown",e=>{draw=true;ctx.beginPath();ctx.moveTo(pos(e).x,pos(e).y);});
-  c.addEventListener("mousemove",e=>{if(!draw)return;ctx.lineTo(pos(e).x,pos(e).y);ctx.stroke();});
-  c.addEventListener("mouseup",()=>draw=false);
-  c.addEventListener("touchstart",e=>{e.preventDefault();draw=true;ctx.beginPath();ctx.moveTo(pos(e).x,pos(e).y);},{passive:false});
-  c.addEventListener("touchmove",e=>{e.preventDefault();if(!draw)return;ctx.lineTo(pos(e).x,pos(e).y);ctx.stroke();},{passive:false});
-  c.addEventListener("touchend",()=>draw=false);
-  document.getElementById(clearId).addEventListener("click",()=>ctx.clearRect(0,0,c.width,c.height));
-  return{canvas:c,ctx};
+  function $(id) {
+  return document.getElementById(id);
 }
-const sigPO=setupCanvas("sigPolicyOwner","clearSigPolicyOwner");
-const sigW=setupCanvas("sigWitness","clearSigWitness");
+  
+/* ---------- CONFIG ---------- */
+const PDF_FILENAME = "Amendment to Application_LF1042_fillable.pdf";
 
-// LocalStorage save/load
-document.querySelectorAll("input,select,textarea").forEach(el=>{
-  el.addEventListener("input",()=>localStorage.setItem(el.id,el.value));
-  const saved=localStorage.getItem(el.id);if(saved)el.value=saved;
+/* ---SAVE STATUS + LOCALSTORAGE (Text, Checkbox, Dropdown) ---------- */
+const saveStatusEl = document.getElementById("saveStatus");
+
+function showSaveStatus(){
+  saveStatusEl.style.opacity = 1;
+  clearTimeout(saveStatusEl._timer);
+  saveStatusEl._timer = setTimeout(()=> saveStatusEl.style.opacity = 0, 1200);
+}
+
+function saveElValue(el){
+  localStorage.setItem(el.id, el.value);
+  showSaveStatus();
+}
+
+function autoBindSave(el){
+  // Restore saved value
+  const saved = localStorage.getItem(el.id);
+  if(saved !== null){
+    if(el.type === "checkbox" || el.type === "radio"){
+      el.checked = (saved === "true"); // restore as boolean
+    } else {
+      el.value = saved; // text + dropdown
+    }
+  }
+
+  // Bind save
+  if(el.tagName === "SELECT"){  
+    el.addEventListener("change", ()=> saveElValue(el));
+  } else if(el.type === "checkbox" || el.type === "radio"){  
+    el.addEventListener("change", ()=> {
+      localStorage.setItem(el.id, el.checked);
+      showSaveStatus();
+    });
+  } else { // text input
+    el.addEventListener("input", ()=>{
+      el.value = el.value.toUpperCase(); // force uppercase
+      saveElValue(el);
+    });
+  }
+}
+  
+/* ---------- UNIVERSAL HELPER FUNCTION ---------- */
+
+  //Detect input type - text/dropdown/checkbox/radio
+function safeSetField(form, fieldName, value) {
+  if (value === null || value === undefined) return;
+
+  try {
+    let field;
+
+    // text or textarea, then force Uppercase
+    try {
+      field = form.getTextField(fieldName);
+      field.setText(value.toUpperCase());
+      return;
+    } catch (e) {}
+
+    // dropdown
+    try {
+      field = form.getDropdown(fieldName);
+      field.select(value);
+      return;
+    } catch (e) {}
+
+    // checkbox
+    try {
+      field = form.getCheckBox(fieldName);
+      if (value === true || value === "true" || value === "on" || value === "checked") {
+        field.check();
+      } else {
+        field.uncheck();
+      }
+      return;
+    } catch (e) {}
+
+    // radio
+    try {
+      field = form.getRadioGroup(fieldName);
+      field.select(value);
+      return;
+    } catch (e) {}
+
+    console.warn(`Field ${fieldName} not found in PDF`);
+  } catch (err) {
+    console.error(`Error setting field ${fieldName}`, err);
+  }
+}
+
+// Text-Area formtting
+// 1. WhatsApp-style auto numbering/bullets
+document.getElementById("Amendment_WriteDetails").addEventListener("keydown", function(e) {
+  if (e.key === "Enter") {
+    e.preventDefault();
+    const start = this.selectionStart;
+    const text = this.value.substring(0, start);
+    const lastLine = text.split("\n").pop();
+
+    // detect numbering (1., 2., 3...)
+    const match = lastLine.match(/^(\d+)\.\s/);
+    if (match) {
+      const nextNum = parseInt(match[1]) + 1;
+      this.setRangeText("\n" + nextNum + ". ", start, start, "end");
+      return;
+    }
+
+    // detect dash (- )
+    if (/^-\s/.test(lastLine)) {
+      this.setRangeText("\n- ", start, start, "end");
+      return;
+    }
+
+    // default new line
+    this.setRangeText("\n", start, start, "end");
+  }
 });
 
-// Fill PDF
+// 2.Word wrap function for PDF export
+function wrapTextByWordsWithPrefix(text, maxCharsPerLine = 60) {
+  const lines = text.split("\n");
+  const wrapped = [];
+
+  lines.forEach((line, index) => {  // <-- add index here
+    // Detect prefix (numbering or dash)
+    const prefixMatch = line.match(/^(\d+\.\s|-\s)/);
+    const prefix = prefixMatch ? prefixMatch[0] : "";
+    const content = prefixMatch ? line.slice(prefix.length) : line;
+
+    let currentLine = prefix;
+    content.split(" ").forEach(word => {
+      // Check if adding the word exceeds max chars
+      if ((currentLine + word).length > maxCharsPerLine) {
+        wrapped.push(currentLine.trimEnd());
+        currentLine = prefix + word + " ";
+      } else {
+        currentLine += word + " ";
+      }
+    });
+    if (currentLine.trim() !== "") wrapped.push(currentLine.trimEnd());
+
+    // Add a small extra line ONLY after numbered items
+    if (/^\d+\.\s/.test(line) && index < lines.length - 1) {
+      wrapped.push(""); // this is your "half-line" gap
+    }
+  });
+
+  return wrapped.join("\n");
+}
+  
+  // 3. Text Area saving to local storage 
+  document.getElementById("Amendment_WriteDetails").addEventListener("input", function() {
+  const start = this.selectionStart;
+  const end = this.selectionEnd;
+  const original = this.value;
+  this.value = original.toUpperCase();
+  this.setSelectionRange(start, end); // restore cursor
+  localStorage.setItem("Amendment_WriteDetails", this.value);
+  showSaveStatus();
+});
+
+  const insertBtn = document.querySelector(".dropdown-with-button button.insert");
+const dropdown = document.getElementById("Amendment_Common");
+const textarea = document.getElementById("Amendment_WriteDetails");
+
+insertBtn.addEventListener("click", () => {
+  const val = dropdown.value;
+  if (!val) return;
+
+  if (textarea.value.trim() === "") {
+    textarea.value = "1. " + val;
+  } else {
+    const lines = textarea.value.split("\n");
+    let lastNum = 0;
+    lines.forEach(line => {
+      const m = line.match(/^(\d+)\./);
+      if (m) lastNum = Math.max(lastNum, parseInt(m[1]));
+    });
+    textarea.value += `\n${lastNum + 1}. ${val}`;
+  }
+
+  textarea.dispatchEvent(new Event("input"));
+  dropdown.value = "";
+});
+  
+/* ---------- SIGNATURE MODAL LOGIC (Owner + Payor) with HiDPI scaling ---------- */
+let sigTarget = null;
+const sigModal = $("sigModal");
+const sigCanvas = $("sigCanvas");
+const sigCtx = sigCanvas.getContext("2d");
+let drawing = false;
+let scaleX = 1, scaleY = 1;
+
+//Resize canvas to look crisp on any screen size & DPR
+function resizeSigCanvas(){
+  const dpr = window.devicePixelRatio || 1;
+  const cssWidth = sigCanvas.clientWidth || sigCanvas.parentElement.clientWidth || 560;
+  const cssHeight = sigCanvas.clientHeight || 220;
+  sigCanvas.width = Math.max(1, Math.floor(cssWidth * dpr));
+  sigCanvas.height = Math.max(1, Math.floor(cssHeight * dpr));
+  sigCtx.setTransform(1,0,0,1,0,0); // reset
+  sigCtx.scale(dpr, dpr);
+  sigCtx.lineWidth = 2;
+  sigCtx.lineCap = "round";
+  sigCtx.strokeStyle = "#000";
+  scaleX = sigCanvas.width / (sigCanvas.getBoundingClientRect().width || cssWidth);
+  scaleY = sigCanvas.height / (sigCanvas.getBoundingClientRect().height || cssHeight);
+ // White background (prevents transparent PNG on PDF)——————
+  //sigCtx.fillStyle = "#fff";
+  //sigCtx.fillRect(0,0,sigCanvas.width/scaleX, sigCanvas.height/scaleY);
+}
+
+
+function openSig(target){
+  sigTarget = target; // 'policyowner' | 'witness'
+  $("sigModalTitle").textContent = target === 'policyowner' ? "Sign: Proposed Life Insured / Policyowner" : "Sign: Witness";
+  sigModal.style.display = "block";
+  sigModal.setAttribute("aria-hidden", "false");
+  // Next frame: ensure layout settled then resize canvas
+  requestAnimationFrame(()=>{
+    resizeSigCanvas();
+    // If there is an existing signature, draw it to current canvas size
+    const existing = localStorage.getItem("sig_"+target);
+    if (existing){
+      const img = new Image();
+      img.onload = ()=>{
+        // cover the canvas area with existing image
+        sigCtx.drawImage(img, 0, 0, sigCanvas.width/scaleX, sigCanvas.height/scaleY);
+      };
+      img.src = existing;
+    }
+  });
+}
+
+
+$("sigClear").addEventListener("click", ()=>{
+  sigCtx.clearRect(0,0,sigCanvas.width, sigCanvas.height);
+  
+  // Repaint white bg in CSS pixels
+  // sigCtx.fillStyle="#fff"; sigCtx.fillRect(0,0,sigCanvas.width/scaleX, sigCanvas.height/scaleY);
+});
+  
+$("sigCancel").addEventListener("click", closeSigModal);
+function closeSigModal(){
+  sigModal.style.display = "none";
+  sigModal.setAttribute("aria-hidden", "true");
+  sigTarget = null;
+}
+$("sigDone").addEventListener("click", ()=>{
+  if(!sigTarget) return;
+  const dataURL = sigCanvas.toDataURL("image/png");
+  localStorage.setItem("sig_"+sigTarget, dataURL);
+  const preview = $("preview_"+sigTarget);
+  preview.innerHTML = `<img alt="Signature ${sigTarget}" src="${dataURL}">`;
+  closeSigModal();
+});
+
+
+//Drawing (mouse + touch) with coordinate conversion *//
+function getPos(e){
+  const rect = sigCanvas.getBoundingClientRect();
+  if(e.touches && e.touches[0]){
+    return { x: (e.touches[0].clientX - rect.left), y: (e.touches[0].clientY - rect.top) };
+  }
+  return { x: (e.clientX - rect.left), y: (e.clientY - rect.top) };
+}
+function startDraw(e){
+  drawing = true;
+  sigCtx.beginPath();
+  const {x,y}=getPos(e);
+  sigCtx.moveTo(x, y);
+  e.preventDefault?.();
+}
+function endDraw(){ drawing = false; sigCtx.beginPath(); }
+function moveDraw(e){
+  if(!drawing) return;
+  const {x,y} = getPos(e);
+  sigCtx.lineTo(x, y);
+  sigCtx.stroke();
+  sigCtx.beginPath();
+  sigCtx.moveTo(x, y);
+  e.preventDefault?.();
+}
+sigCanvas.addEventListener("mousedown", startDraw);
+sigCanvas.addEventListener("mousemove", moveDraw);
+window.addEventListener("mouseup", endDraw);
+sigCanvas.addEventListener("touchstart", startDraw, {passive:false});
+sigCanvas.addEventListener("touchmove", moveDraw, {passive:false});
+sigCanvas.addEventListener("touchend", endDraw);
+window.addEventListener("resize", ()=> {
+  // Only resize when modal is open to avoid reflow glitches
+  if(sigModal.getAttribute("aria-hidden")==="false"){ 
+    const img = new Image();
+    img.onload = ()=>{
+      resizeSigCanvas();
+      sigCtx.drawImage(img, 0, 0, sigCanvas.width/scaleX, sigCanvas.height/scaleY);
+    };
+    img.src = sigCanvas.toDataURL("image/png");
+  }
+});
+
+  /* Clear preview buttons + restore previews on load */
+$("clearPreviewPolicyowner").addEventListener("click", ()=>{
+  localStorage.removeItem("sig_policyowner");
+  $("preview_policyowner").innerHTML = `<span>Tap to Sign 
+  (Proposed Life Insured / Policyowner)</span>`;
+});
+$("clearPreviewWitness").addEventListener("click", ()=>{
+  localStorage.removeItem("sig_witness");
+  $("preview_witness").innerHTML = `<span>Tap to Sign (Witness)</span>`;
+});
+window.addEventListener("DOMContentLoaded", ()=>{
+  ["policyowner","witness"].forEach(role=>{
+    const saved = localStorage.getItem("sig_"+role);
+    if(saved){ $("preview_"+role).innerHTML = `<img alt="Signature ${role}" src="${saved}">`; }
+  });
+});
+  
+
+/* ---------- GENERATE PDF ---------- */
 async function fillPDF(){
-  const res=await fetch("Amendment to Application_LF1042_fillable.pdf");
-  const bytes=await res.arrayBuffer();
-  const pdfDoc=await PDFLib.PDFDocument.load(bytes);
-  const form=pdfDoc.getForm();
-  function set(id){try{form.getTextField(id).setText(document.getElementById(id).value||"");}catch(e){}}
-  set("LifeProposed_Name");
-  set("LifeProposed_NRIC");
-  set("PolicyNo");
-  set("Amendment_WriteDetails");
-  set("Signed_Day");
-  set("Signed_Month");
-  set("Signed_Year");
-  set("Signed_State");
-  set("Sign_Witness_Name");
-  set("Sign_Witness_NRIC");
-  set("Sign_LifeProposedPO_Name");
-  set("Sign_LifeProposedPO_NRIC");
-  set("Sign_LifeProposedPO_Mobile");
+  try {
+    $("generate").disabled = true;
 
-  const pages=pdfDoc.getPages();
-  const page=pages[0];
-  if(sigPO.canvas.toDataURL().length>100){
-    const png=await pdfDoc.embedPng(await fetch(sigPO.canvas.toDataURL()).then(r=>r.arrayBuffer()));
-    page.drawImage(png,{x:350,y:150,width:160,height:50}); // approx coords
-  }
-  if(sigW.canvas.toDataURL().length>100){
-    const png=await pdfDoc.embedPng(await fetch(sigW.canvas.toDataURL()).then(r=>r.arrayBuffer()));
-    page.drawImage(png,{x:150,y:150,width:160,height:50}); // approx coords
-  }
+    const res = await fetch(PDF_FILENAME);
+    if (!res.ok) throw new Error("Cannot load PDF: " + PDF_FILENAME);
+    const bytes = await res.arrayBuffer();
+    const pdfDoc = await PDFLib.PDFDocument.load(bytes);
+    const form = pdfDoc.getForm();
 
-  const pdfBytes=await pdfDoc.save();
-  const blob=new Blob([pdfBytes],{type:"application/pdf"});
-  const url=URL.createObjectURL(blob);
-  const a=document.createElement("a");
-  a.href=url;a.download="Filled_LF1042.pdf";a.click();
-  URL.revokeObjectURL(url);
+    const pages = pdfDoc.getPages();
+    const page = pages[0]; // use first page
+
+    // Amendment Details - Allow multiple lines in PDF field
+    const amendmentField = form.getTextField("Amendment_WriteDetails");
+    if (amendmentField) {
+    amendmentField.enableMultiline(); // ✅ allow multiple lines in the PDF field
+    const val = localStorage.getItem("Amendment_WriteDetails") || "";
+amendmentField.setText(wrapTextByWordsWithPrefix(val, 60));
+    }
+ 
+
+    // FILL FORM FIELDS FROM LOCALSTORAGE HERE
+   [
+  "LifeProposed_Name",
+  "PolicyNo",
+  "LifeProposed_NRIC",
+  "Amendment_WriteDetails",
+  "Signed_State",
+  "Signed_Day",
+  "Signed_Month",
+  "Signed_Year",
+  "Sign_LifeProposedPO_Name",
+  "Sign_LifeProposedPO_NRIC",
+  "Sign_LifeProposedPO_Mobile",
+  "Sign_Witness_Name",
+  "Sign_Witness_NRIC"
+  ].forEach(fieldName => {
+  safeSetField(form, fieldName, localStorage.getItem(fieldName));
+  });
+    
+    // Policyowner signature
+    const sigPolicyowner = localStorage.getItem("sig_policyowner");
+if (sigPolicyowner) {
+  try {
+    const imgPolicyowner = await pdfDoc.embedPng(sigPolicyowner);
+    const { width, height } = imgPolicyowner.size();
+
+    const previewEl = document.getElementById("preview_policyowner");
+    const boxW = previewEl.offsetWidth;
+    const boxH = previewEl.offsetHeight;
+
+    const scale = Math.min(boxW / width, boxH / height);
+    let drawW = width * scale;
+    let drawH = height * scale;
+
+    const factor = 0.35; // % scale on PDF
+    const posX = 380;     // X position on PDF
+    const posY = 145;    // Y position on PDF
+
+    drawW *= factor;
+    drawH *= factor;
+
+    page.drawImage(imgPolicyowner, {
+      x: posX,
+      y: posY,
+      width: drawW,
+      height: drawH
+    });
+  } catch (e) {
+    console.error(e);
+  }
 }
 
-document.getElementById("generate").addEventListener("click",fillPDF);
-document.getElementById("resetAll").addEventListener("click",()=>{
-  localStorage.clear();location.reload();
+    // Witness signature
+    const sigWitness = localStorage.getItem("sig_witness");
+if (sigWitness) {
+  try {
+    const imgWitness = await pdfDoc.embedPng(sigWitness);
+    const { width, height } = imgWitness.size();
+
+    const previewEl = document.getElementById("preview_witness");
+    const boxW = previewEl.offsetWidth;
+    const boxH = previewEl.offsetHeight;
+
+    const scale = Math.min(boxW / width, boxH / height);
+    let drawW = width * scale;
+    let drawH = height * scale;
+
+    const factor = 0.35; // % scale on PDF
+    const posX = 50;    // X position on PDF
+    const posY = 145;    // Y position on PDF
+
+    drawW *= factor;
+    drawH *= factor;
+
+    page.drawImage(imgWitness, {
+      x: posX,
+      y: posY,
+      width: drawW,
+      height: drawH
+    });
+  } catch (e) {
+    console.error(e);
+  }
+}
+
+    //Flatten PDF
+    form.flatten();
+
+    //Save + Download
+    const pdfBytes = await pdfDoc.save();
+    const blob = new Blob([pdfBytes], { type: "application/pdf" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = "Amendment_to_Application_LF1042_filled.pdf";
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+    setTimeout(()=> URL.revokeObjectURL(url), 2500);
+
+  } catch(err){
+    alert("PDF generation failed: " + (err.message || err));
+    console.error(err);
+  } finally {
+    $("generate").disabled = false;
+  }
+}
+
+  //Autobind - Bind text inputs, textareas, and selects
+  // binding = connection between field ↔️ localStorage
+document.querySelectorAll("input[type=text], textarea, select").forEach(autoBindSave);
+
+  // Attach when page loads
+$("generate").addEventListener("click", fillPDF);
+$("resetAll").addEventListener("click", () => {
+  localStorage.clear();
+  location.reload();
 });
+  
 </script>
+</main> 
 </body>
 </html>
