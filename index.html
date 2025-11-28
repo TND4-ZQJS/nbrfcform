@@ -335,12 +335,17 @@ function autoBindSave(el){
       localStorage.setItem(el.id, el.checked);
       showSaveStatus();
     });
-  } else { // text input
-    el.addEventListener("input", ()=>{
-      el.value = el.value.toUpperCase(); // force uppercase
-      saveElValue(el);
-    });
-  }
+} else { // text input
+  el.addEventListener("input", ()=>{
+    const start = el.selectionStart;
+    const end = el.selectionEnd;
+
+    el.value = el.value.toUpperCase();
+
+    el.setSelectionRange(start, end);  // restore cursor
+    saveElValue(el);
+  });
+}
 }
   
 /* ---------- UNIVERSAL HELPER FUNCTION ---------- */
