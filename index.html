@@ -149,7 +149,7 @@
     </label>
 
     <div class="row">
-      <label style="flex:1">Policy No. (single)
+      <label style="flex:1">Policy No.
         <input id="PolicyNo" class="persist" type="text" placeholder="Enter policy number">
       </label>
       <label style="flex:1">IC Number
@@ -228,8 +228,16 @@
   <!-- SECTION: Owner/Policyowner Signature -->
   <section class="section">
     <h2>Signature of Proposed Life Insured / Policyowner</h2>
+
     <div class="row">
-      <label style="flex:1">Proposed Life Insured/Policyowner Name
+    <label style="display: flex; align-items: center; gap: 8px; cursor: pointer; margin-bottom: 10px;">
+      <input type="checkbox" id="copyInfoCheckbox"> 
+      <strong>Copy from insured info above</strong>
+    </label>
+  </div>
+    
+    <div class="row">
+      <label style="flex:1">Proposed LifeInsured/Policyowner Name
         <input id="Sign_LifeProposedPO_Name" class="persist" type="text" placeholder="AS IN I/C">
       </label>
     </div>
@@ -489,6 +497,41 @@ insertBtn.addEventListener("click", () => {
   textarea.dispatchEvent(new Event("input"));
   dropdown.value = "";
 });
+
+//AUTO FILLING OF SIGNATURE SECTION
+const checkbox = document.getElementById('copyInfoCheckbox');
+
+// Source fields
+const sourceName = document.getElementById('LifeProposed_Name');
+const sourceNRIC = document.getElementById('LifeProposed_NRIC');
+
+// Target fields
+const targetName = document.getElementById('Sign_LifeProposedPO_Name');
+const targetNRIC = document.getElementById('Sign_LifeProposedPO_NRIC');
+
+function syncData() {
+  if (checkbox.checked) {
+    targetName.value = sourceName.value;
+    targetNRIC.value = sourceNRIC.value;
+    
+    // Optional: Make target fields readonly while checked to prevent confusion
+    targetName.readOnly = true;
+    targetNRIC.readOnly = true;
+  } else {
+    targetName.readOnly = false;
+    targetNRIC.readOnly = false;
+  }
+}
+
+// Trigger sync when checkbox is toggled
+checkbox.addEventListener('change', syncData);
+
+// Trigger sync when user types in the source fields (only if checkbox is checked)
+[sourceName, sourceNRIC].forEach(input => {
+  input.addEventListener('input', () => {
+    if (checkbox.checked) syncData();
+  });
+});  
   
 
 /* ---------- SIGNATURE MODAL LOGIC ---------- */
@@ -618,7 +661,7 @@ $("sigDone").addEventListener("click", () => {
 $("clearPreviewPolicyowner").addEventListener("click", ()=>{
   localStorage.removeItem("ata_sig_policyowner");
   $("preview_policyowner").innerHTML = `<span>Tap to Sign 
-  (Proposed Life Insured / Policyowner)</span>`;
+  (Insured / Policyowner)</span>`;
 
   // also clear from canvas if modal currently showing owner
   if (sigTarget === "policyowner") signaturePad.clear();
