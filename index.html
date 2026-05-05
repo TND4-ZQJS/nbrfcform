@@ -513,8 +513,13 @@ function syncData() {
   if (checkbox.checked) {
     targetName.value = sourceName.value;
     targetNRIC.value = sourceNRIC.value;
-    
-    // Optional: Make target fields readonly while checked to prevent confusion
+
+    // --- KEY ADDITION BELOW ---
+    // Manually trigger the 'input' event so your persistence script saves the data
+    targetName.dispatchEvent(new Event('input', { bubbles: true }));
+    targetNRIC.dispatchEvent(new Event('input', { bubbles: true }));
+    // --------------------------
+
     targetName.readOnly = true;
     targetNRIC.readOnly = true;
   } else {
@@ -523,15 +528,13 @@ function syncData() {
   }
 }
 
-// Trigger sync when checkbox is toggled
 checkbox.addEventListener('change', syncData);
 
-// Trigger sync when user types in the source fields (only if checkbox is checked)
 [sourceName, sourceNRIC].forEach(input => {
   input.addEventListener('input', () => {
     if (checkbox.checked) syncData();
   });
-});  
+});
   
 
 /* ---------- SIGNATURE MODAL LOGIC ---------- */
