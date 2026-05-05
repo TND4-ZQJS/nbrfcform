@@ -91,6 +91,14 @@
   background-color: #fff;
   transition: border-color 0.2s, box-shadow 0.2s;
 }
+
+  input[readonly] {
+  background: #f2f2f2;
+  color: #555;
+  cursor: not-allowed;
+  border: 1px solid #ddd; /* Makes the border look softer/disabled */
+  outline: none;          /* Prevents the blue focus ring if clicked */
+}
   
   /* Policy grid (for "additional policies" dynamic demo to mirror reference behavior) */
   .policy-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
@@ -232,7 +240,7 @@
     <div class="row">
     <label style="display: flex; align-items: center; gap: 8px; cursor: pointer; margin-bottom: 10px;">
       <input type="checkbox" id="copyInfoCheckbox"> 
-      <strong>Copy from insured info above</strong>
+      Copy from insured info above
     </label>
   </div>
     
@@ -510,21 +518,20 @@ const targetName = document.getElementById('Sign_LifeProposedPO_Name');
 const targetNRIC = document.getElementById('Sign_LifeProposedPO_NRIC');
 
 function syncData() {
-  if (checkbox.checked) {
+  const isChecked = checkbox.checked;
+
+  // 1. Set the ReadOnly state (your CSS input[readonly] will automatically darken it)
+  targetName.readOnly = isChecked;
+  targetNRIC.readOnly = isChecked;
+
+  if (isChecked) {
+    // 2. Copy the values
     targetName.value = sourceName.value;
     targetNRIC.value = sourceNRIC.value;
 
-    // --- KEY ADDITION BELOW ---
-    // Manually trigger the 'input' event so your persistence script saves the data
+    // 3. Trigger the 'input' event so the data saves to localStorage
     targetName.dispatchEvent(new Event('input', { bubbles: true }));
     targetNRIC.dispatchEvent(new Event('input', { bubbles: true }));
-    // --------------------------
-
-    targetName.readOnly = true;
-    targetNRIC.readOnly = true;
-  } else {
-    targetName.readOnly = false;
-    targetNRIC.readOnly = false;
   }
 }
 
