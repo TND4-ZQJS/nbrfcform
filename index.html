@@ -529,48 +529,6 @@ a.back-link svg {margin-left: -6px;transform: translateY(0.5px);stroke: #007aff 
 
 <script src="https://cdn.jsdelivr.net/npm/signature_pad@4.0.0/dist/signature_pad.umd.min.js"></script>
 <script src="https://unpkg.com/pdf-lib/dist/pdf-lib.min.js"></script>
-
-<script type="module">
-    import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm';
-
-    // SUPABASE CONFIGURATION
-    const SUPABASE_URL = "https://qotxxqwikxpsjnjddoqm.supabase.co"; 
-    const SUPABASE_ANON_KEY = "sb_publishable_xpWOcimLjRbH2dbeRdoBSg_XddyOqYU";    
-    
-    const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-
-    // Active Auth Guard Execution
-    async function checkAuthGuard() {
-        try {
-            const { data: { session }, error } = await supabase.auth.getSession();
-            if (error) throw error;
-            
-            if (!session) {
-                window.location.href = "login.html";
-                return;
-            }
-            console.log("Access Granted:", session.user.email);
-        } catch (err) {
-            console.error("Security guard error:", err);
-            window.location.href = "login.html";
-        }
-    }
-
-    // Expose Logout API cleanly to the UI window scope
-    window.handleLogout = async function() {
-        try {
-            await supabase.auth.signOut();
-        } catch (err) {
-            console.error("Error during sign out:", err);
-        } finally {
-            window.location.href = "login.html";
-        }
-    };
-
-    // Execute session validation immediately
-    checkAuthGuard();
-</script>   
-
 <script>
 // Selector Helper
 function $(id) {
