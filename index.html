@@ -1,343 +1,154 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Magic Filler - CI Pro Universe</title>
+<meta charset="utf-8" />
+<title>Amendment to Application (LF1042)</title>
+<meta name="viewport" content="width=device-width,initial-scale=1" />
 <style>
-/* ============================================================
-    GLOBAL DESIGN VARIABLES (Unified Workspace Framework)
-   ============================================================ */
-*, *::before, *::after { 
-    box-sizing: border-box; 
-    margin: 0; 
-    padding: 0; 
+  :root{
+    --bg:#f6f7f9; --card:#fff; --accent:#007aff; --muted:#666; --line:#e9e9ee;
+  }
+  *{box-sizing:border-box}
+  body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Arial;margin:18px;background:var(--bg);color:#111}
+  main{max-width:980px;margin:0 auto;background:var(--card);padding:18px;border-radius:12px;box-shadow:0 8px 28px rgba(0,0,0,0.06)}
+  h1{margin:15px 0 35px 0;font-size:1.50rem}
+  .section{background:#fbfbfd;border:1px solid #eee;padding:14px;border-radius:10px;margin:12px 0}
+  .section h2{margin:0 0 10px 0;font-size:1.05rem}
+  label{display:block;margin:8px 0;font-size:0.95rem}
+  input[type=text],input[type=number],select,textarea{
+    width:100%;padding:10px;border-radius:10px;border:1px solid #ddd;margin-top:6px;font-size:1rem;background:#fff
+  }
+  textarea{resize:vertical;min-height:120px}
+  .row{display:flex;gap:12px;align-items:center;flex-wrap:wrap;margin:8px 0}
+  .muted{color:var(--muted);font-size:0.85rem}
+  button{background:var(--accent);color:#fff;border:0;padding:10px 14px;border-radius:10px;cursor:pointer}
+  button.secondary{background:#999}
+  button.ghost{background:transparent;border:1px solid var(--line);color:#333}
+  .actions{display:flex;gap:12px;align-items:center}
+
+.dropdown-with-button {
+  position: relative;
+  display: inline-block;
+  width: 100%;
 }
 
-:root {
-    --nav-height: 52px;
-    --accent: #0071e3;
-    --bg: #f5f5f7;       /* Clean gray workspace canvas background */
-    --surface: #ffffff;  /* Card surface background */
-    --text-primary: #1d1d1f;
-    --text-secondary: #515154;
-    --text-tertiary: #86868b;
-    --border: rgba(0, 0, 0, 0.06);
-    --line: #e9e9ee;
+/* Select box */
+.dropdown-with-button select {
+  width: 100%;
+  padding: 10px 80px 10px 12px; /* leave space for button */
+  border: 1px solid #ddd;
+  border-radius: 10px;          
+  font-size: 1rem;
+  appearance: none;
+  background-color: #fff;
+  transition: border-color 0.2s, box-shadow 0.2s;
 }
 
-body {
-    background-color: var(--bg);
-    color: var(--text-primary);
-    font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", "Segoe UI", sans-serif;
-    -webkit-font-smoothing: antialiased;
-    line-height: 1.5;
+.dropdown-with-button select:focus {
+  outline: none;
+  border-color: var(--accent);
+  box-shadow: 0 0 0 2px rgba(0,122,255,0.2);
 }
 
-.container {
-    max-width: 940px;
-    margin: 40px auto;
-    padding: 0 24px 20px;
-}
-
-/* ============================================================
-    STICKY STYLISH NAVBAR STRUCTURE
-   ============================================================ */
-.navbar {
-    position: sticky;
-    top: 0;
-    z-index: 100;
-    background: rgba(255, 255, 255, 0.85);
-    backdrop-filter: blur(20px);
-    -webkit-backdrop-filter: blur(20px);
-    border-bottom: 1px solid var(--border);
-    height: var(--nav-height);
-}
-
-.nav-container {
-    max-width: 940px;
-    margin: 0 auto;
-    padding: 0 24px;
-    height: 100%;
-    display: flex;
-    align-items: center;
-    gap: 32px;
-}
-
-.logo {
-    font-size: 16px;
-    font-weight: 700;
-    color: var(--text-primary);
-    cursor: pointer;
-    letter-spacing: -0.02em;
-    flex-shrink: 0;
-}
-
-.nav-menu {
-    display: flex;
-    gap: 4px;
-    align-items: center;
-    margin-left: auto;
-}
-
-.nav-item {
-    font-size: 13px;
-    font-weight: 500;
-    color: var(--text-secondary);
-    text-decoration: none;
-    padding: 6px 12px;
-    border-radius: 8px;
-    transition: background 0.15s, color 0.15s;
-    white-space: nowrap;
-}
-
-.nav-item:hover { 
-    background: rgba(0,0,0,0.05); 
-    color: var(--text-primary); 
-}
-
-.nav-item.active { 
-    background: rgba(0,113,227,0.08); 
-    color: var(--accent); 
-}
-
-.menu-toggle {
-    display: none;
-    flex-direction: column;
-    gap: 5px;
-    cursor: pointer;
-    margin-left: auto;
-    padding: 6px;
-}
-
-.menu-toggle span {
-    display: block;
-    width: 22px;
-    height: 2px;
-    background: var(--text-primary);
-    border-radius: 2px;
-    transition: 0.3s;
-}
-
-@media (max-width: 700px) {
-    .menu-toggle { display: flex; }
-    .nav-menu {
-        display: none;
-        position: absolute;
-        top: var(--nav-height);
-        left: 0; right: 0;
-        background: rgba(255,255,255,0.97);
-        backdrop-filter: blur(20px);
-        flex-direction: column;
-        padding: 12px 16px 20px;
-        gap: 2px;
-        border-bottom: 1px solid var(--border);
-    }
-    .nav-menu.show { display: flex; }
-    .nav-item { width: 100%; padding: 10px 14px; }
-}
-
-/* Security Box */
-.security {
-    padding: 60px 0;
-}
-
-.security-box {
-    background-color: transparent;
-    border-left: 3px solid #86868b;
-    padding: 16px 24px;
-    font-size: 14px;
-    color: #6e6e73;
-}        
-
-/* Footer */
-.footer {
-    padding: 40px 24px;
-    text-align: center;
-    font-size: 12px;
-    color: #86868b;
-    border-top: 1px solid #e8e8ed;
-}    
-
-/* Hero Section */
-.hero {
-    padding-top: 140px;
-    padding-bottom: 80px;
-    text-align: center;
-}
-
-.badge {
-    font-size: 20px;
-    font-weight: 600;
-    color: #bf4800;
-    text-transform: uppercase;
-    letter-spacing: 0.05em;
-    display: block;
-    margin-bottom: 12px;
-}
-
-.hero h1 {
-    font-size: 48px;
-    font-weight: 700;
-    letter-spacing: -0.03em;
-    line-height: 1.1;
-    margin-bottom: 16px;
-    color: #1d1d1f;
-}
-
-.subtitle {
-    font-size: 19px;
-    color: #86868b;
-    max-width: 640px;
-    margin: 0 auto;
-    font-weight: 400;
-    letter-spacing: -0.01em;
-}    
-
-/* ============================================================
-    FILLER WORKSPACE COMPONENT STYLES
-   ============================================================ */
-.section { background: #fbfbfd; border: 1px solid #eee; padding: 14px; border-radius: 10px; margin: 12px 0; }
-.section h2 { margin: 0 0 10px 0; font-size: 1.05rem; }
-label { display: block; margin: 8px 0; font-size: 0.95rem; }
-input[type=text], input[type=email], input[type=number], input[type=tel], select, textarea {
-    width: 100%; padding: 10px; border-radius: 10px; border: 1px solid #ddd; margin-top: 6px; font-size: 1rem; background: #fff;
-}
-.row { display: flex; gap: 12px; align-items: center; flex-wrap: wrap; margin: 8px 0; }
-.muted { color: #86868b; font-size: 0.85rem; }
-
-button { background: var(--accent); color: #fff; border: 0; padding: 10px 16px; border-radius: 10px; cursor: pointer; font-weight: 500; font-size: 0.95rem; transition: background 0.15s; }
-button:hover { background: #0077ed; }
-button.secondary { background: #999; }
-button.ghost { background: transparent; border: 1px solid var(--line); color: #333; }
-button.ghost:hover { background: rgba(0,0,0,0.02); }
-.actions { display: flex; gap: 12px; align-items: center; }
-
-/* Nominee grid */
-.nominee-grid { display: grid; grid-template-columns: 1fr; gap: 12px; }
-.nominee { background: #fff; padding: 12px; border-radius: 10px; border: 1px solid #eee; position: relative; }
-.nominee h3 { margin: 0 0 8px 0; font-size: 0.95rem; display: flex; align-items: center; justify-content: space-between; }
-.nominee .remove-btn { background: transparent; border: 1px solid var(--line); color: #333; border-radius: 8px; padding: 6px 10px; font-size: 0.9rem; }
-.nominee .remove-btn:hover { border-color: #d0d0d7; }
-
-/* Wizard Steps Interface Tracker */
-.step-indicator { display: flex; justify-content: space-between; margin-bottom: 30px; background: #fff; padding: 15px; border-radius: 12px; border: 1px solid var(--line); overflow-x: auto; gap: 10px; }
-.step { flex: 1; text-align: center; font-size: 0.8rem; color: #888; cursor: pointer; transition: all 0.2s ease-in-out; padding: 8px; border-radius: 8px; min-width: 90px; display: flex; flex-direction: column; align-items: center; }
-.step:hover { background: #f0f7ff; color: var(--accent); }
-.step.active { color: var(--accent); font-weight: 600; background: #f0f7ff; }
-.step-num { width: 28px; height: 28px; line-height: 28px; border-radius: 50%; background: #eee; display: block; margin-bottom: 6px; font-size: 0.85rem; transition: background 0.3s; color: #333; }
-.step.active .step-num { background: var(--accent); color: #fff; }
-
-.wizard-step { display: none; background: var(--surface); padding: 12px; border-radius: 18px; border: 1px solid rgba(0,0,0,0.02); box-shadow: 0 4px 12px rgba(0,0,0,0.01); }
-.wizard-step.active { display: block; animation: slideIn 0.3s ease-out; }
-
-@keyframes slideIn { from { opacity: 0; transform: translateX(10px); } to { opacity: 1; transform: translateX(0); } }
-.wizard-actions { display: flex; justify-content: space-between; margin-top: 30px; padding: 20px 0; border-top: 1px solid var(--line); }  
-
-/* Signature preview tiles */
-.sig-preview {
-    width: 100%; height: 150px; border: 1px dashed #bbb; border-radius: 10px;
-    display: flex; align-items: center; justify-content: center; background: #fff; cursor: pointer; position: relative;
-}
-.sig-preview img { max-width: 100%; max-height: 100%; object-fit: contain; }
-.sig-preview span { color: #999; }
-
-/* Signature Modal */
-.sig-modal { display: none; position: fixed; inset: 0; background: rgba(0,0,0,.45); z-index: 1000; }
-.sig-modal .box {
-    width: min(560px, 92vw); background: #fff; margin: 6vh auto; padding: 14px; border-radius: 12px;
-    box-shadow: 0 18px 50px rgba(0,0,0,.25);}
-.sig-modal h3 { margin: 0 0 8px 0; }
-#sigCanvas { width: 100%; height: 220px; background: #fff; border: 1px solid #ddd; border-radius: 10px; touch-action: none; }
-.sig-actions { display: flex; gap: 10px; justify-content: flex-end; margin-top: 10px; }
-
-/* ============================================================
-    PREMIUM iOS BACK NAVIGATION ENGINE (Optimized)
-   ============================================================ */
-.back-navigation-container {max-width: 940px;margin: 20px auto 0 auto;padding: 0 24px;display: flex;align-items: center;}
-a.back-link,
-a.back-link span {text-decoration: none !important;text-decoration-line: none !important;border-bottom: none !important;box-shadow: none !important;outline: none !important;}
-a.back-link {display: inline-flex;align-items: center;gap: 2px;color:#007aff; 
-            font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", "SF Pro Display", "Helvetica Neue", Arial, sans-serif;
-            font-size: 16px;font-weight: 400;letter-spacing: -0.3px;transition: opacity 0.15s ease;cursor: pointer;-webkit-user-select: none;user-select: none;}
-a.back-link:hover {opacity: 0.7;}
-a.back-link:active {opacity: 0.3;}
-a.back-link svg {margin-left: -6px;transform: translateY(0.5px);stroke: #007aff !important;fill: none; /* Ensures vector shapes don't accidentally bloat */}
-
-  .btn-set-today {
-  margin-left: 8px;
-  padding: 4px 10px !important;
-  font-size: 0.75rem !important;
-  height: auto !important;
-  border-color: var(--accent) !important;
-  color: var(--accent) !important;
-  background: transparent;
-  font-weight: 500;
+/* Insert button as egg shape */
+.dropdown-with-button button.insert {
+  position: absolute;
+  top: 50%;
+  right: 8px;               /* some spacing from edge */
+  transform: translateY(-50%); /* vertically center */
+  height: 28px;              /* fixed height for egg shape */
+  padding: 0 12px;           /* horizontal padding */
+  border: none;              /* seamless */
+  border-radius: 50px;       /* fully rounded (egg shape) */
+  background-color: #fff;    /* same as select */
+  color: var(--accent);
+  font-size: 0.85rem;
   cursor: pointer;
-  border-radius: 6px;
-} 
-/* Save indicator */
-#saveStatus {
-    position: fixed; bottom: 12px; right: 12px; background: var(--accent); color: #fff;
-    padding: 6px 10px; border-radius: 8px; font-size: 0.85rem; opacity: 0; transition: opacity .25s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.12); /* subtle shadow */
+  transition: background 0.15s, transform 0.1s;
 }
 
-@media (max-width: 900px) { 
-    .header-grid { grid-template-columns: 1fr; } 
-    .onetime-charge-options { grid-column: 1 / -1; } 
+.dropdown-with-button button.insert:hover {
+  background-color: #f5f6fa;
 }
-@media (max-width: 720px) { 
-    .policy-grid { grid-template-columns: 1fr; } 
-    .card-digit { width: 60px; } 
-    .back-navigation-container { margin-top: 15px; padding: 0 24px; }
+
+.dropdown-with-button button.insert:active {
+  transform: translateY(-50%) scale(0.97);
+  box-shadow: 0 1px 2px rgba(0,0,0,0.1);
 }
+
+/* Adjust select padding to avoid overlap with egg button */
+.dropdown-with-button select {
+  width: 100%;
+  padding: 10px 100px 10px 12px; /* make room for egg button */
+  border: 1px solid #ddd;
+  border-radius: 10px;          
+  font-size: 1rem;
+  appearance: none;
+  background-color: #fff;
+  transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+  input[readonly] {
+  background: #f2f2f2;
+  color: #555;
+  cursor: not-allowed;
+  border: 1px solid #ddd; /* Makes the border look softer/disabled */
+  outline: none;          /* Prevents the blue focus ring if clicked */
+}
+  
+  /* Policy grid (for "additional policies" dynamic demo to mirror reference behavior) */
+  .policy-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+  .policy{background:#fff;padding:12px;border-radius:10px;border:1px solid #eee;position:relative}
+  .policy h3{margin:0 0 8px 0;font-size:0.95rem;display:flex;align-items:center;justify-content:space-between}
+  .policy .remove-btn{background:transparent;border:1px solid var(--line);color:#333;border-radius:8px;padding:6px 10px;font-size:0.9rem}
+  .policy .remove-btn:hover{border-color:#d0d0d7}
+
+  /* Signature preview tiles */
+  .sig-preview{
+    width:100%; height:150px; border:1px dashed #bbb; border-radius:10px;
+    display:flex; align-items:center; justify-content:center; background:#fff; cursor:pointer; position:relative;
+  }
+  .sig-preview img{ max-width:100%; max-height:100%; object-fit:contain; }
+  .sig-preview span{ color:#999; }
+
+  /* Signature Modal */
+  .sig-modal{ display:none; position:fixed; inset:0; background:rgba(0,0,0,.45); z-index:1000; }
+  .sig-modal .box{
+    width:min(560px, 92vw); background:#fff; margin:6vh auto; padding:14px; border-radius:12px;
+    box-shadow:0 18px 50px rgba(0,0,0,.25)
+  }
+  .sig-modal h3{ margin:0 0 8px 0; }
+  /* NOTE: canvas is responsive via CSS; internal pixels are set in JS for crispness */
+  #sigCanvas{ width:100%; height:220px; background:#fff; border:1px solid #ddd; border-radius:10px; touch-action:none }
+  .sig-actions{ display:flex; gap:10px; justify-content:flex-end; margin-top:10px; }
+
+  /* Hidden signature XY tuning inputs (owner/witness) */
+  .hidden-inputs {display: none;}
+
+  /* Preview pane */
+  .preview{background:#fff;border:1px solid #eee;border-radius:10px;padding:10px}
+  .preview canvas{width:100%;height:auto;border-radius:8px}
+
+  /* Save indicator */
+  #saveStatus{
+    position:fixed; top:12px; right:12px; background:var(--accent); color:#fff;
+    padding:6px 10px; border-radius:8px; font-size:0.85rem; opacity:0; transition:opacity .25s;
+  }
+
+  @media (max-width:720px){
+    .policy-grid{grid-template-columns:1fr}
+  }
 </style>
-
 </head>
 <body>
+<main>
+  <h1>Amendment to Application (LF1042)</h1>
 
-    <!-- Global Navigation Header -->
-    <header class="navbar">
-        <div class="nav-container">
-            <span class="logo" onclick="window.location.href='dashboard.html'">CI Pro Universe</span>
-
-            <!-- JavaScript Mobile Opener Hook -->
-            <div class="menu-toggle" onclick="toggleMobileMenu()" aria-label="Toggle menu">
-                <span></span><span></span><span></span>
-            </div>
-
-            <nav class="nav-menu" id="navMenu">
-                <a href="dashboard.html" class="nav-item">Operational Hub</a>
-                <a href="cipro-experience.html" class="nav-item">CI Pro Experience</a>
-                <a href="eposbuddy.html" class="nav-item">EPOS Buddy</a>
-                <a href="magicfiller.html" class="nav-item active">Magic Filler</a>
-            </nav>
-        </div>
-    </header>
-
-<div class="back-navigation-container">
-    <a href="#" id="backToMainLink" class="back-link" aria-label="Go back to previous page" role="button">
-        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-            <polyline points="15 18 9 12 15 6"></polyline>
-        </svg>
-        <span>Back</span>
-    </a>
-</div>
-
-    <main class="container">
-
-      <section class="hero" style="padding-top: 0px; padding-bottom: 20px; text-align: left;">
-            <span class="badge">Amendment to Application</span>
-        </section>
-
-        <div class="step-indicator" id="stepIndicator">
-    <div class="step active"><span class="step-num">1</span>Policy</div>
-    <div class="step"><span class="step-num">2</span>Amendment Details</div>
-    <div class="step"><span class="step-num">3</span>Sign</div>
-  </div>  
-        
-   <!-- STEP 1: Policy -->
-    <div class="wizard-step active">     
+  <!-- SECTION: Proposed Life Insured Info -->
   <section class="section">
     <h2>Proposed Life Insured Info</h2>
 
@@ -355,13 +166,9 @@ a.back-link svg {margin-left: -6px;transform: translateY(0.5px);stroke: #007aff 
     </div>
   </section>
 
-</div>
-
-  <!-- STEP 2: Amendment Details -->
-<div class="wizard-step"> 
-
-<section class="section">    
-<h2>Details of Amendment</h2>
+  <!-- SECTION: Details of Amendment -->
+  <section class="section">
+    <h2>Details of Amendment</h2>
     <label>Write details here
       <textarea id="Amendment_WriteDetails" class="persist" rows="15" placeholder="Describe the amendment in detail..."></textarea>
     </label>
@@ -376,21 +183,18 @@ a.back-link svg {margin-left: -6px;transform: translateY(0.5px);stroke: #007aff 
     <option>Change Accelerated CI Face Amount</option>
     <option>Business Adress: Home Based</option>
   </select>
-  <button type="button" class="insertCommonBtn">Insert</button>
+  <button type="button" class="insert">Insert</button>
 </div>
-</section>
+  </section>
 
-</div>  
-
-<!-- STEP 3: Sign -->
-<div class="wizard-step">         
-
-<section class="section">
+  <!-- SECTION: Signature Details (Date/Place) -->
+  <section class="section">
     <h2>Signature Details</h2>
     <div class="row">
       <label style="flex:1">Signed at (State)
         <select id="Signed_State" class="persist">
           <option value="">-- Select State --</option>
+          <!-- Same label set used in your reference -->
           <option>SELANGOR</option><option>K.LUMPUR</option><option>MELAKA</option><option>JOHOR</option>
           <option>N.SEMBILAN</option><option>PENANG</option><option>PERAK</option><option>SABAH</option>
           <option>SARAWAK</option><option>KELANTAN</option><option>PERLIS</option><option>T'GANU</option>
@@ -423,14 +227,10 @@ a.back-link svg {margin-left: -6px;transform: translateY(0.5px);stroke: #007aff 
       <label style="flex:1">Year
         <select id="Signed_Year" class="persist">
           <option value="">-- Year (YYYY) --</option>
-          <option>2026</option><option>2027</option><option>2028</option>
+          <option>2025</option><option>2026</option>
         </select>
       </label>
     </div>
-
-        <div class="row">
-  <button type="button" class="btn-set-today ghost" onclick="setSignedDateToday()">Today</button>
-</div>
   </section>
 
   <!-- SECTION: Owner/Policyowner Signature -->
@@ -464,6 +264,8 @@ a.back-link svg {margin-left: -6px;transform: translateY(0.5px);stroke: #007aff 
     <div class="row">
       <button id="clearPreviewPolicyowner" class="secondary" type="button">Clear Signature</button>
     </div>
+    
+
   </section>
 
   <!-- SECTION: Witness Signature -->
@@ -484,35 +286,13 @@ a.back-link svg {margin-left: -6px;transform: translateY(0.5px);stroke: #007aff 
     <div class="row">
       <button id="clearPreviewWitness" class="secondary" type="button">Clear Signature</button>
     </div>
-  </section>
 
     <section class="section actions">
     <button id="generate">Generate PDF</button>
     <button id="resetAll" class="secondary">Reset All</button>
   </section>
 
-</div>
-
-   <!-- NAVIGATION BUTTONS -->
-    <div class="wizard-actions">
-      <button type="button" id="prevBtn" class="ghost" onclick="changeStep(-1)" style="visibility:hidden;">Previous</button>
-      <button type="button" id="nextBtn" onclick="changeStep(1)">Next Step</button>
-    </div>      
-
-    <section class="security" style="padding: 0 0 60px 0;">
-            <div class="security-box">
-                <strong>Secured Session Active:</strong> This platform operates on a static, local-injection framework. We do not store, log, or track any personal details or financial credentials on external servers.
-            </div>
-    </section>       
-        
-</main>
-
-    <footer class="footer">
-        &copy; 2026 CI Pro Universe Portal. All rights reserved. Built for CI Pro operations.
-    </footer>    
-
-<!-- Signature Modal -->
- <div id="sigModal" class="sig-modal" aria-hidden="true">
+    <div id="sigModal" class="sig-modal" aria-hidden="true">
   <div class="box">
     <h3 id="sigModalTitle">Draw Signature</h3>
     <!-- Responsive canvas: internal pixels are set in JS for crispness -->
@@ -524,665 +304,541 @@ a.back-link svg {margin-left: -6px;transform: translateY(0.5px);stroke: #007aff 
     </div>
   </div>
 </div>
-
-<div id="saveStatus">Saved</div>
+    <div id="saveStatus">Saved</div>
+  </section>
 
 <script src="https://cdn.jsdelivr.net/npm/signature_pad@4.0.0/dist/signature_pad.umd.min.js"></script>
 <script src="https://unpkg.com/pdf-lib/dist/pdf-lib.min.js"></script>
-
-<script type="module">
-    import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm';
-
-    // SUPABASE CONFIGURATION
-    const SUPABASE_URL = "https://qotxxqwikxpsjnjddoqm.supabase.co"; 
-    const SUPABASE_ANON_KEY = "sb_publishable_xpWOcimLjRbH2dbeRdoBSg_XddyOqYU";    
-    
-    const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-
-    // Active Auth Guard Execution
-    async function checkAuthGuard() {
-        try {
-            const { data: { session }, error } = await supabase.auth.getSession();
-            if (error) throw error;
-            
-            if (!session) {
-                window.location.href = "login.html";
-                return;
-            }
-            console.log("Access Granted:", session.user.email);
-        } catch (err) {
-            console.error("Security guard error:", err);
-            window.location.href = "login.html";
-        }
-    }
-
-    // Expose Logout API cleanly to the UI window scope
-    window.handleLogout = async function() {
-        try {
-            await supabase.auth.signOut();
-        } catch (err) {
-            console.error("Error during sign out:", err);
-        } finally {
-            window.location.href = "login.html";
-        }
-    };
-
-    // Execute session validation immediately
-    checkAuthGuard();
-</script>   
-
 <script>
-// Selector Helper
-function $(id) {
-    return document.getElementById(id);
+
+  function $(id) {
+  return document.getElementById(id);
 }
   
-/* ---------- CONFIG & ENVIROMENT VARIABLES ---------- */
+/* ---------- CONFIG ---------- */
 const PDF_FILENAME = "Amendment to Application_LF1042_fillable.pdf";
+
+/* ---SAVE STATUS + LOCALSTORAGE (Text, Checkbox, Dropdown) ---------- */
 const saveStatusEl = document.getElementById("saveStatus");
 
 function showSaveStatus(){
-    if (!saveStatusEl) return;
-    saveStatusEl.style.opacity = 1;
-    clearTimeout(saveStatusEl._timer);
-    saveStatusEl._timer = setTimeout(() => saveStatusEl.style.opacity = 0, 1200);
+  saveStatusEl.style.opacity = 1;
+  clearTimeout(saveStatusEl._timer);
+  saveStatusEl._timer = setTimeout(()=> saveStatusEl.style.opacity = 0, 1200);
 }
 
 function saveElValue(el){
-    if (!el || !el.id) return;
-    if (el.type === "checkbox" || el.type === "radio") {
-        localStorage.setItem(el.id, el.checked);
-    } else {
-        localStorage.setItem(el.id, el.value);
-    }
-    showSaveStatus();
+  localStorage.setItem(el.id, el.value);
+  showSaveStatus();
 }
 
 function autoBindSave(el){
-    if (!el || !el.id) return;
-
-    // Restore saved value state securely from storage
-    const saved = localStorage.getItem(el.id);
-    if(saved !== null){
-        if(el.type === "checkbox" || el.type === "radio"){
-            el.checked = (saved === "true");
-        } else {
-            el.value = saved;
-        }
+  // Restore saved value
+  const saved = localStorage.getItem(el.id);
+  if(saved !== null){
+    if(el.type === "checkbox" || el.type === "radio"){
+      el.checked = (saved === "true"); // restore as boolean
+    } else {
+      el.value = saved; // text + dropdown
     }
+  }
 
-    // Bind real-time change events
-    if(el.tagName === "SELECT"){  
-        el.addEventListener("change", () => saveElValue(el));
-    } else if(el.type === "checkbox" || el.type === "radio"){  
-        el.addEventListener("change", () => saveElValue(el));
-    } else { 
-        el.addEventListener("input", () => {
-            const start = el.selectionStart;
-            const end = el.selectionEnd;
+  // Bind save
+  if(el.tagName === "SELECT"){  
+    el.addEventListener("change", ()=> saveElValue(el));
+  } else if(el.type === "checkbox" || el.type === "radio"){  
+    el.addEventListener("change", ()=> {
+      localStorage.setItem(el.id, el.checked);
+      showSaveStatus();
+    });
+} else { // text input
+  el.addEventListener("input", ()=>{
+    const start = el.selectionStart;
+    const end = el.selectionEnd;
 
-            el.value = el.value.toUpperCase();
+    el.value = el.value.toUpperCase();
 
-            if (start !== null && end !== null) {
-                el.setSelectionRange(start, end); 
-            }
-            saveElValue(el);
-        });
-    }
+    el.setSelectionRange(start, end);  // restore cursor
+    saveElValue(el);
+  });
+}
 }
   
-/* ---------- UNIVERSAL FIELD PROCESSING ENGINE ---------- */
+/* ---------- UNIVERSAL HELPER FUNCTION ---------- */
+
+  //Detect input type - text/dropdown/checkbox/radio
 function safeSetField(form, fieldName, value) {
-    if (value === null || value === undefined) return;
+  if (value === null || value === undefined) return;
 
+  try {
+    let field;
+
+    // text or textarea, then force Uppercase
     try {
-        let field;
+      field = form.getTextField(fieldName);
+      field.setText(value.toUpperCase());
+      return;
+    } catch (e) {}
 
-        try {
-            field = form.getTextField(fieldName);
-            field.setText(value.toUpperCase());
-            return;
-        } catch (e) {}
+    // dropdown
+    try {
+      field = form.getDropdown(fieldName);
+      field.select(value);
+      return;
+    } catch (e) {}
 
-        try {
-            field = form.getDropdown(fieldName);
-            field.select(value);
-            return;
-        } catch (e) {}
+    // checkbox
+    try {
+      field = form.getCheckBox(fieldName);
+      if (value === true || value === "true" || value === "on" || value === "checked") {
+        field.check();
+      } else {
+        field.uncheck();
+      }
+      return;
+    } catch (e) {}
 
-        try {
-            field = form.getCheckBox(fieldName);
-            if (value === true || value === "true" || value === "on" || value === "checked") {
-                field.check();
-            } else {
-                field.uncheck();
-            }
-            return;
-        } catch (e) {}
+    // radio
+    try {
+      field = form.getRadioGroup(fieldName);
+      field.select(value);
+      return;
+    } catch (e) {}
 
-        try {
-            field = form.getRadioGroup(fieldName);
-            field.select(value);
-            return;
-        } catch (e) {}
+    console.warn(`Field ${fieldName} not found in PDF`);
+  } catch (err) {
+    console.error(`Error setting field ${fieldName}`, err);
+  }
+}
 
-        console.warn(`Field ${fieldName} not found in PDF template structured design maps.`);
-    } catch (err) {
-        console.error(`Error setting field map targets: ${fieldName}`, err);
+// Text-Area formtting
+// 1. WhatsApp-style auto numbering/bullets
+document.getElementById("Amendment_WriteDetails").addEventListener("keydown", function(e) {
+  if (e.key === "Enter") {
+    e.preventDefault();
+    const start = this.selectionStart;
+    const text = this.value.substring(0, start);
+    const lastLine = text.split("\n").pop();
+
+    // detect numbering (1., 2., 3...)
+    const match = lastLine.match(/^(\d+)\.\s/);
+    if (match) {
+      const nextNum = parseInt(match[1]) + 1;
+      this.setRangeText("\n" + nextNum + ". ", start, start, "end");
+      return;
     }
-}
 
-// WhatsApp-style text area line interception behaviors
-const writeDetailsTextArea = document.getElementById("Amendment_WriteDetails");
-if (writeDetailsTextArea) {
-    writeDetailsTextArea.addEventListener("keydown", function(e) {
-        if (e.key === "Enter") {
-            e.preventDefault();
-            const start = this.selectionStart;
-            const text = this.value.substring(0, start);
-            const lastLine = text.split("\n").pop();
+    // detect dash (- )
+    if (/^-\s/.test(lastLine)) {
+      this.setRangeText("\n- ", start, start, "end");
+      return;
+    }
 
-            // Detect numbering sequence formatting (e.g. "1. ")
-            const match = lastLine.match(/^(\d+)\.\s/);
-            if (match) {
-                const nextNum = parseInt(match[1]) + 1;
-                this.setRangeText("\n" + nextNum + ". ", start, start, "end");
-                this.dispatchEvent(new Event("input"));
-                return;
-            }
+    // default new line
+    this.setRangeText("\n", start, start, "end");
+  }
+});
 
-            // Detect simple bullet markdown configurations (e.g. "- ")
-            if (/^-\s/.test(lastLine)) {
-                this.setRangeText("\n- ", start, start, "end");
-                this.dispatchEvent(new Event("input"));
-                return;
-            }
+// 2.Word wrap function for PDF export
+function wrapTextByWordsWithPrefix(text, maxCharsPerLine = 60) {
+  const lines = text.split("\n");
+  const wrapped = [];
 
-            this.setRangeText("\n", start, start, "end");
-            this.dispatchEvent(new Event("input"));
-        }
+  lines.forEach((line, index) => {  // <-- add index here
+    // Detect prefix (numbering or dash)
+    const prefixMatch = line.match(/^(\d+\.\s|-\s)/);
+    const prefix = prefixMatch ? prefixMatch[0] : "";
+    const content = prefixMatch ? line.slice(prefix.length) : line;
+
+    let currentLine = prefix;
+    content.split(" ").forEach(word => {
+      // Check if adding the word exceeds max chars
+      if ((currentLine + word).length > maxCharsPerLine) {
+        wrapped.push(currentLine.trimEnd());
+        currentLine = prefix + word + " ";
+      } else {
+        currentLine += word + " ";
+      }
     });
+    if (currentLine.trim() !== "") wrapped.push(currentLine.trimEnd());
 
-    writeDetailsTextArea.addEventListener("input", function() {
-        const start = this.selectionStart;
-        const end = this.selectionEnd;
-        this.value = this.value.toUpperCase();
-        if (start !== null && end !== null) {
-            this.setSelectionRange(start, end);
-        }
-        localStorage.setItem("Amendment_WriteDetails", this.value);
-        showSaveStatus();
-    });
+    // Add a small extra line ONLY after numbered items
+    if (/^\d+\.\s/.test(line) && index < lines.length - 1) {
+      wrapped.push(""); // this is your "half-line" gap
+    }
+  });
+
+  return wrapped.join("\n");
 }
+  
+  // 3. Text Area saving to local storage 
+  document.getElementById("Amendment_WriteDetails").addEventListener("input", function() {
+  const start = this.selectionStart;
+  const end = this.selectionEnd;
+  const original = this.value;
+  this.value = original.toUpperCase();
+  this.setSelectionRange(start, end); // restore cursor
+  localStorage.setItem("Amendment_WriteDetails", this.value);
+  showSaveStatus();
+});
 
-
-// Dropdown quick select insertion logic
-const insertBtn = document.querySelector(".insertCommonBtn");
+  const insertBtn = document.querySelector(".dropdown-with-button button.insert");
 const dropdown = document.getElementById("Amendment_Common");
+const textarea = document.getElementById("Amendment_WriteDetails");
 
-if (insertBtn && dropdown && writeDetailsTextArea) {
-    insertBtn.addEventListener("click", () => {
-        const val = dropdown.value;
-        if (!val) return;
+insertBtn.addEventListener("click", () => {
+  const val = dropdown.value;
+  if (!val) return;
 
-        if (writeDetailsTextArea.value.trim() === "") {
-            writeDetailsTextArea.value = "1. " + val;
-        } else {
-            const lines = writeDetailsTextArea.value.split("\n");
-            let lastNum = 0;
-            lines.forEach(line => {
-                const m = line.match(/^(\d+)\./);
-                if (m) lastNum = Math.max(lastNum, parseInt(m[1]));
-            });
-            writeDetailsTextArea.value += `\n${lastNum + 1}. ${val}`;
-        }
-
-        writeDetailsTextArea.dispatchEvent(new Event("input"));
-        dropdown.value = "";
+  if (textarea.value.trim() === "") {
+    textarea.value = "1. " + val;
+  } else {
+    const lines = textarea.value.split("\n");
+    let lastNum = 0;
+    lines.forEach(line => {
+      const m = line.match(/^(\d+)\./);
+      if (m) lastNum = Math.max(lastNum, parseInt(m[1]));
     });
-}
+    textarea.value += `\n${lastNum + 1}. ${val}`;
+  }
 
-// Proportional Insured Data Copy Link Sync
+  textarea.dispatchEvent(new Event("input"));
+  dropdown.value = "";
+});
+
+//AUTO FILLING OF SIGNATURE SECTION
 const checkbox = document.getElementById('copyInfoCheckbox');
+
+// Source fields
 const sourceName = document.getElementById('LifeProposed_Name');
 const sourceNRIC = document.getElementById('LifeProposed_NRIC');
+
+// Target fields
 const targetName = document.getElementById('Sign_LifeProposedPO_Name');
 const targetNRIC = document.getElementById('Sign_LifeProposedPO_NRIC');
 
 function syncData() {
-    if (!checkbox) return;
-    const isChecked = checkbox.checked;
+  const isChecked = checkbox.checked;
 
-    if (targetName && targetNRIC) {
-        targetName.readOnly = isChecked;
-        targetNRIC.readOnly = isChecked;
+  // 1. Set the ReadOnly state (your CSS input[readonly] will automatically darken it)
+  targetName.readOnly = isChecked;
+  targetNRIC.readOnly = isChecked;
 
-        if (isChecked && sourceName && sourceNRIC) {
-            targetName.value = sourceName.value;
-            targetNRIC.value = sourceNRIC.value;
+  if (isChecked) {
+    // 2. Copy the values
+    targetName.value = sourceName.value;
+    targetNRIC.value = sourceNRIC.value;
 
-            targetName.dispatchEvent(new Event('input', { bubbles: true }));
-            targetNRIC.dispatchEvent(new Event('input', { bubbles: true }));
-        }
-    }
+    // 3. Trigger the 'input' event so the data saves to localStorage
+    targetName.dispatchEvent(new Event('input', { bubbles: true }));
+    targetNRIC.dispatchEvent(new Event('input', { bubbles: true }));
+  }
 }
 
-if (checkbox) {
-    checkbox.addEventListener('change', syncData);
-}
+checkbox.addEventListener('change', syncData);
 
 [sourceName, sourceNRIC].forEach(input => {
-    if (input) {
-        input.addEventListener('input', () => {
-            if (checkbox && checkbox.checked) syncData();
-        });
-    }
+  input.addEventListener('input', () => {
+    if (checkbox.checked) syncData();
+  });
 });
+  
 
-/* ---------- Date Set Today Button ---------- */  
-function setSignedDateToday() {
-  const now = new Date();
-
-  // 1. Format Day (e.g., 5 -> "05")
-  const dayStr = String(now.getDate()).padStart(2, '0');
-
-  // 2. Format Month string matching select options
-  const monthNames = [
-    "JANUARY", "FEBRUARY", "MARCH", "APRIL", "MAY", "JUNE",
-    "JULY", "AUGUST", "SEPTEMBER", "OCTOBER", "NOVEMBER", "DECEMBER"
-  ];
-  const monthStr = monthNames[now.getMonth()];
-
-  // 3. Format Year (e.g., "2026")
-  const yearStr = String(now.getFullYear());
-
-  // 4. Target elements
-  const daySelect = document.getElementById('Signed_Day');
-  const monthSelect = document.getElementById('Signed_Month');
-  const yearSelect = document.getElementById('Signed_Year');
-
-  if (daySelect && monthSelect && yearSelect) {
-    // Set values
-    daySelect.value = dayStr;
-    monthSelect.value = monthStr;
-    yearSelect.value = yearStr;
-
-    // Dispatch change event to trigger local storage auto-save listeners if present
-    daySelect.dispatchEvent(new Event('change', { bubbles: true }));
-    monthSelect.dispatchEvent(new Event('change', { bubbles: true }));
-    yearSelect.dispatchEvent(new Event('change', { bubbles: true }));
-
-    // Explicitly write to localStorage if you store form fields by ID directly
-    saveToLocalStorage('Signed_Day', dayStr);
-    saveToLocalStorage('Signed_Month', monthStr);
-    saveToLocalStorage('Signed_Year', yearStr);
-  }
-}
-
-// Helper function for local storage persistence
-function saveToLocalStorage(id, value) {
-  try {
-    localStorage.setItem(id, value);
-    
-    const saveStatus = document.getElementById('saveStatus');
-    if (saveStatus) {
-      saveStatus.style.opacity = '1';
-      setTimeout(() => { saveStatus.style.opacity = '0'; }, 1500);
-    }
-  } catch (e) {
-    console.error('Failed to save to localStorage:', e);
-  }
-}
-
-/* ---------- SIGNATURE PAD MECHANICS & DRAWING CANVAS CONTROLS ---------- */
+/* ---------- SIGNATURE MODAL LOGIC ---------- */
 let sigTarget = null;
 const sigModal = $("sigModal");
 const sigCanvas = $("sigCanvas");
-const sigCtx = sigCanvas ? sigCanvas.getContext("2d") : null;
-let signaturePad = null;
+const sigCtx = sigCanvas.getContext("2d");
 
-if (sigCanvas) {
-    signaturePad = new SignaturePad(sigCanvas, {
-        minWidth: 0.7,
-        maxWidth: 2.5,
-        velocityFilterWeight: 0.6,
-        minDistance: 3,
-        throttle: 16,
-        penColor: "black",
-        backgroundColor: "rgba(0,0,0,0)"
-    });
-}
+const signaturePad = new SignaturePad(sigCanvas, {
+  minWidth: 0.7,              // Thin lines when moving fast
+  maxWidth: 2.5,              // Thicker when moving slowly
+  velocityFilterWeight: 0.6,  // More responsive to speed, but still smooth
+  minDistance: 3,             // Capture detail without too many points
+  throttle: 16,               // ~60 FPS, smooth without lag
+  penColor: "black",          // Signature color
+  backgroundColor: "rgba(0,0,0,0)" // Transparent background
+  //minWidth: 1,
+  //maxWidth: 3,
+  //penColor: "black",
+  //backgroundColor: "rgba(0,0,0,0)"
+});
 
 function resizeCanvas() {
-    if (!sigCanvas || !sigCtx) return;
-    const ratio = Math.max(window.devicePixelRatio || 1, 1);
-    const storageKey = sigTarget ? "ata_sig_" + sigTarget : null;
-    const savedFromStorage = storageKey ? localStorage.getItem(storageKey) : null;
-    const sourceData = savedFromStorage || sigCanvas.toDataURL();
+  const ratio = Math.max(window.devicePixelRatio || 1, 1);
 
-    sigCanvas.width = Math.floor(sigCanvas.offsetWidth * ratio);
-    sigCanvas.height = Math.floor(sigCanvas.offsetHeight * ratio);
-    sigCtx.setTransform(ratio, 0, 0, ratio, 0, 0);
+  // If modal is open and sigTarget exists, prefer the stored PNG for that role.
+  // Otherwise fall back to the current canvas content.
+  const storageKey = sigTarget ? "ata_sig_" + sigTarget : null;
+  const savedFromStorage = storageKey ? localStorage.getItem(storageKey) : null;
+  const sourceData = savedFromStorage || sigCanvas.toDataURL();
 
-    const cssW = sigCanvas.offsetWidth;
-    const cssH = sigCanvas.offsetHeight;
+  // Set canvas size in device pixels (prevent subpixel rounding issues)
+  sigCanvas.width = Math.floor(sigCanvas.offsetWidth * ratio);
+  sigCanvas.height = Math.floor(sigCanvas.offsetHeight * ratio);
 
-    if (sourceData && typeof sourceData === "string" && sourceData.indexOf("data:image") === 0) {
-        const img = new Image();
-        img.onload = () => {
-            sigCtx.clearRect(0, 0, cssW, cssH);
-            const scale = Math.min(cssW / img.width, cssH / img.height);
-            const x = (cssW - img.width * scale) / 2;
-            const y = (cssH - img.height * scale) / 2;
-            sigCtx.drawImage(img, x, y, img.width * scale, img.height * scale);
-        };
-        img.src = sourceData;
-    } else if (signaturePad) {
-        signaturePad.clear();
-    }
+  // Reset transform and set scale so drawing coordinates are in CSS pixels
+  sigCtx.setTransform(ratio, 0, 0, ratio, 0, 0);
+
+  // CSS size (in drawing units now) for layout math
+  const cssW = sigCanvas.offsetWidth;
+  const cssH = sigCanvas.offsetHeight;
+
+  // If we have an image source (PNG), draw it proportionally and center it
+  if (sourceData && typeof sourceData === "string" && sourceData.indexOf("data:image") === 0) {
+    const img = new Image();
+    img.onload = () => {
+      // clear using CSS coordinate space
+      sigCtx.clearRect(0, 0, cssW, cssH);
+
+      // Scale image proportionally to fit inside canvas area (CSS pixels)
+      const scale = Math.min(cssW / img.width, cssH / img.height);
+      const x = (cssW - img.width * scale) / 2;
+      const y = (cssH - img.height * scale) / 2;
+
+      // draw using CSS units (ctx is already scaled by devicePixelRatio)
+      sigCtx.drawImage(img, x, y, img.width * scale, img.height * scale);
+    };
+    img.src = sourceData;
+  } else {
+    // No image to draw — clear the pad so it's ready for a new signature
+    signaturePad.clear();
+  }
 }
 window.addEventListener("resize", resizeCanvas);
 
-window.openSig = function(target) {
-    sigTarget = target;
+function openSig(target) {
+  sigTarget = target;
 
-    if (target === "policyowner") {
-        $("sigModalTitle").textContent = "Sign: Proposed Life Insured / Policyowner";
-    } else {
-        $("sigModalTitle").textContent = "Sign: Witness";
-    }
+  if (target === "policyowner") {
+    $("sigModalTitle").textContent = "Sign: Proposed Life Insured / Policyowner";
+  } else {
+    $("sigModalTitle").textContent = "Sign: Witness";
+  }
 
-    sigModal.style.display = "block";
-    sigModal.setAttribute("aria-hidden", "false");
+  sigModal.style.display = "block";
+  sigModal.setAttribute("aria-hidden", "false");
 
-    requestAnimationFrame(() => {
-        resizeCanvas();
-    });
-};
-
-if ($("sigClear")) {
-    $("sigClear").addEventListener("click", () => {
-        if (!signaturePad) return;
-        signaturePad.clear();
-
-        if (sigTarget) {
-            localStorage.removeItem("ata_sig_" + sigTarget);
-            $("preview_" + sigTarget).innerHTML = `<span>Tap to Sign (${
-                sigTarget.charAt(0).toUpperCase() + sigTarget.slice(1)
-            })</span>`;
-        }
-    });
+  requestAnimationFrame(() => {
+    resizeCanvas();
+  });
 }
 
-if ($("sigCancel")) {
-    $("sigCancel").addEventListener("click", closeSigModal);
-}
+$("sigClear").addEventListener("click", ()=>{
+  signaturePad.clear();
 
-function closeSigModal(){
-    if (sigModal) {
-        sigModal.style.display = "none";
-        sigModal.setAttribute("aria-hidden", "true");
-    }
-    sigTarget = null;
-}
-  
-if ($("sigDone")) {
-    $("sigDone").addEventListener("click", () => {
-        if (!sigTarget || !sigCanvas || !signaturePad) return;
+  if (sigTarget) {
+    // remove saved signature
+    localStorage.removeItem("ata_sig_" + sigTarget);
 
-        const dataURL = sigCanvas.toDataURL("image/png");
-
-        if (signaturePad.isEmpty() && !localStorage.getItem("ata_sig_" + sigTarget)) {
-            const label = sigTarget.charAt(0).toUpperCase() + sigTarget.slice(1);
-            $("preview_" + sigTarget).innerHTML = `<span>Tap to Sign (${label})</span>`;
-            localStorage.removeItem("ata_sig_" + sigTarget);
-        } else {
-            localStorage.setItem("ata_sig_" + sigTarget, dataURL);
-            $("preview_" + sigTarget).innerHTML = `<img alt="Signature ${sigTarget}" src="${dataURL}">`;
-        }
-
-        closeSigModal();
-    });
-}
-
-/* Clear preview individual routes */
-if ($("clearPreviewPolicyowner")) {
-    $("clearPreviewPolicyowner").addEventListener("click", () => {
-        localStorage.removeItem("ata_sig_policyowner");
-        $("preview_policyowner").innerHTML = `<span>Tap to Sign (Insured / Policyowner)</span>`;
-        if (sigTarget === "policyowner" && signaturePad) signaturePad.clear();
-    });
-}
-
-if ($("clearPreviewWitness")) {
-    $("clearPreviewWitness").addEventListener("click", () => {
-        localStorage.removeItem("ata_sig_witness");
-        $("preview_witness").innerHTML = `<span>Tap to Sign (Witness)</span>`;
-        if (sigTarget === "witness" && signaturePad) signaturePad.clear();
-    });
-}
-
-window.addEventListener("DOMContentLoaded", () => {
-    ["policyowner","witness"].forEach(role => {
-        const saved = localStorage.getItem("ata_sig_" + role);
-        if(saved && $("preview_" + role)){
-            $("preview_" + role).innerHTML = `<img alt="Signature ${role}" src="${saved}">`;
-        }
-    });
-
-    // Ensure state sync occurs on load if copyInfoCheckbox was active
-    if (checkbox && checkbox.checked) {
-        syncData();
-    }
+    // reset preview back to "Tap to Sign (…) "
+    $("preview_" + sigTarget).innerHTML = `<span>Tap to Sign (${
+      sigTarget.charAt(0).toUpperCase() + sigTarget.slice(1)
+    })</span>`;
+  }
 });
   
-/* ---------- EXPORT MECHANICS: COMPILING & DOWNLOADING FIELD DATA TO PDF ---------- */
+$("sigCancel").addEventListener("click", closeSigModal);
+function closeSigModal(){
+  sigModal.style.display = "none";
+  sigModal.setAttribute("aria-hidden", "true");
+  sigTarget = null;
+}
+  
+$("sigDone").addEventListener("click", () => {
+  if (!sigTarget) return;
+
+  // Always take snapshot from the canvas (even if unchanged)
+  const dataURL = sigCanvas.toDataURL("image/png");
+
+  if (signaturePad.isEmpty() && !localStorage.getItem("ata_sig_" + sigTarget)) {
+    // If no strokes and nothing saved before → treat as empty
+    const label = sigTarget.charAt(0).toUpperCase() + sigTarget.slice(1);
+    $("preview_" + sigTarget).innerHTML = `<span>Tap to Sign (${label})</span>`;
+    localStorage.removeItem("ata_sig_" + sigTarget);
+  } else {
+    // Save whatever is currently visible on the canvas
+    localStorage.setItem("ata_sig_" + sigTarget, dataURL);
+    $("preview_" + sigTarget).innerHTML = `<img alt="Signature ${sigTarget}" src="${dataURL}">`;
+  }
+
+  closeSigModal();
+});
+
+
+
+/* Clear preview buttons + restore previews on load */
+$("clearPreviewPolicyowner").addEventListener("click", ()=>{
+  localStorage.removeItem("ata_sig_policyowner");
+  $("preview_policyowner").innerHTML = `<span>Tap to Sign 
+  (Insured / Policyowner)</span>`;
+
+  // also clear from canvas if modal currently showing owner
+  if (sigTarget === "policyowner") signaturePad.clear();
+});
+
+$("clearPreviewWitness").addEventListener("click", ()=>{
+  localStorage.removeItem("ata_sig_witness");
+  $("preview_witness").innerHTML = `<span>Tap to Sign (Witness)</span>`;
+
+  if (sigTarget === "witness") signaturePad.clear();
+});
+
+
+window.addEventListener("DOMContentLoaded", ()=>{
+  ["policyowner","witness"].forEach(role=>{
+    const saved = localStorage.getItem("ata_sig_"+role);
+    if(saved){
+      $("preview_"+role).innerHTML = `<img alt="Signature ${role}" src="${saved}">`;
+    }
+  });
+});
+  
+
+/* ---------- GENERATE PDF ---------- */
 async function fillPDF(){
-    try {
-        $("generate").disabled = true;
+  try {
+    $("generate").disabled = true;
 
-        const res = await fetch(PDF_FILENAME);
-        if (!res.ok) throw new Error("Cannot locate form resource layout blueprint: " + PDF_FILENAME);
-        const bytes = await res.arrayBuffer();
-        const pdfDoc = await PDFLib.PDFDocument.load(bytes);
-        const form = pdfDoc.getForm();
+    const res = await fetch(PDF_FILENAME);
+    if (!res.ok) throw new Error("Cannot load PDF: " + PDF_FILENAME);
+    const bytes = await res.arrayBuffer();
+    const pdfDoc = await PDFLib.PDFDocument.load(bytes);
+    const form = pdfDoc.getForm();
 
-        const pages = pdfDoc.getPages();
-        const page = pages[0];
+    const pages = pdfDoc.getPages();
+    const page = pages[0]; // use first page
 
-        const amendmentField = form.getTextField("Amendment_WriteDetails");
-        if (amendmentField) {
-        amendmentField.enableMultiline(); 
-        const val = localStorage.getItem("Amendment_WriteDetails") || "";
-        amendmentField.setText(val.toUpperCase());
-        }
-
-        // Sequential text iteration parameters
-        [
-            "LifeProposed_Name",
-            "PolicyNo",
-            "LifeProposed_NRIC",
-            "Signed_State",
-            "Signed_Day",
-            "Signed_Month",
-            "Signed_Year",
-            "Sign_LifeProposedPO_Name",
-            "Sign_LifeProposedPO_NRIC",
-            "Sign_LifeProposedPO_Mobile",
-            "Sign_Witness_Name",
-            "Sign_Witness_NRIC"
-        ].forEach(fieldName => {
-            safeSetField(form, fieldName, localStorage.getItem(fieldName));
-        });
-
-        // Layer Owner Signatures
-        const sigPolicyowner = localStorage.getItem("ata_sig_policyowner");
-        if (sigPolicyowner) {
-            try {
-                const imgPolicyowner = await pdfDoc.embedPng(sigPolicyowner);
-                const { width, height } = imgPolicyowner.size();
-                const previewEl = document.getElementById("preview_policyowner");
-                
-                if (previewEl) {
-                    const boxW = previewEl.offsetWidth;
-                    const boxH = previewEl.offsetHeight;
-                    const scale = Math.min(boxW / width, boxH / height);
-                    let drawW = width * scale * 0.35;
-                    let drawH = height * scale * 0.35;
-
-                    page.drawImage(imgPolicyowner, { x: 380, y: 145, width: drawW, height: drawH });
-                }
-            } catch (e) { console.error("Policyowner Signature compression failed:", e); }
-        }
-
-        // Layer Witness Signatures
-        const sigWitness = localStorage.getItem("ata_sig_witness");
-        if (sigWitness) {
-            try {
-                const imgWitness = await pdfDoc.embedPng(sigWitness);
-                const { width, height } = imgWitness.size();
-                const previewEl = document.getElementById("preview_witness");
-                
-                if (previewEl) {
-                    const boxW = previewEl.offsetWidth;
-                    const boxH = previewEl.offsetHeight;
-                    const scale = Math.min(boxW / width, boxH / height);
-                    let drawW = width * scale * 0.35;
-                    let drawH = height * scale * 0.35;
-
-                    page.drawImage(imgWitness, { x: 50, y: 145, width: drawW, height: drawH });
-                }
-            } catch (e) { console.error("Witness Signature compilation failed:", e); }
-        }
-
-        const pdfBytes = await pdfDoc.save();
-        const policyInput = document.getElementById('PolicyNo');
-        let policyNum = "NEW";
-        
-        if (policyInput && policyInput.value.trim() !== "") {
-            policyNum = policyInput.value.trim().replace(/[^a-z0-9]/gi, '_');
-        }
-
-        const finalFileName = `${policyNum}_Amendment_to_Application.pdf`;
-        const blob = new Blob([pdfBytes], { type: "application/pdf" });
-        const url = URL.createObjectURL(blob);
-        const a = document.createElement("a"); 
-        
-        a.href = url; 
-        a.download = finalFileName;
-        document.body.appendChild(a); 
-        a.click(); 
-        a.remove();
-        
-        setTimeout(() => URL.revokeObjectURL(url), 2500);
-    } catch(err){
-        alert("PDF structural processing failed: " + (err.message || err));
-        console.error(err);
-    } finally {
-        $("generate").disabled = false;
+    // Amendment Details - Allow multiple lines in PDF field
+    const amendmentField = form.getTextField("Amendment_WriteDetails");
+    if (amendmentField) {
+    amendmentField.enableMultiline(); // ✅ allow multiple lines in the PDF field
+    const val = localStorage.getItem("Amendment_WriteDetails") || "";
+amendmentField.setText(wrapTextByWordsWithPrefix(val, 60));
     }
-}
+ 
 
-/* ---------- SYSTEM WORKSPACE SECURITY & TARGETED RESETS ---------- */
-window.resetFormAndReload = function() {
-    if (!confirm("Are you sure you want to reset the form? All saved fields and signature snapshots will be erased permanently.")) {
-        return; 
-    }
+    // FILL FORM FIELDS FROM LOCALSTORAGE HERE
+   [
+  "LifeProposed_Name",
+  "PolicyNo",
+  "LifeProposed_NRIC",
+  "Amendment_WriteDetails",
+  "Signed_State",
+  "Signed_Day",
+  "Signed_Month",
+  "Signed_Year",
+  "Sign_LifeProposedPO_Name",
+  "Sign_LifeProposedPO_NRIC",
+  "Sign_LifeProposedPO_Mobile",
+  "Sign_Witness_Name",
+  "Sign_Witness_NRIC"
+  ].forEach(fieldName => {
+  safeSetField(form, fieldName, localStorage.getItem(fieldName));
+  });
+    
 
-    // Explicit targets only - preserves the Supabase authentication tokens
-    const formKeys = [
-        "LifeProposed_Name", "PolicyNo", "LifeProposed_NRIC", "Amendment_WriteDetails",
-        "Signed_State", "Signed_Day", "Signed_Month", "Signed_Year",
-        "Sign_LifeProposedPO_Name", "Sign_LifeProposedPO_NRIC", "Sign_LifeProposedPO_Mobile",
-        "Sign_Witness_Name", "Sign_Witness_NRIC", "copyInfoCheckbox",
-        "ata_sig_policyowner", "ata_sig_witness"
-    ];
+// Owner signature
+const sigPolicyowner = localStorage.getItem("ata_sig_policyowner");
+if (sigPolicyowner) {
+  try {
+    const imgPolicyowner = await pdfDoc.embedPng(sigPolicyowner);
+    const { width, height } = imgPolicyowner.size();
 
-    formKeys.forEach(key => localStorage.removeItem(key));
-    window.location.reload();
-};
+    const previewEl = document.getElementById("preview_policyowner");
+    const boxW = previewEl.offsetWidth;
+    const boxH = previewEl.offsetHeight;
 
-// Auto Bind all active fields to local preservation streams
-document.querySelectorAll("input[type=text], input[type=checkbox], textarea, select").forEach(autoBindSave);
+    const scale = Math.min(boxW / width, boxH / height);
+    let drawW = width * scale;
+    let drawH = height * scale;
 
-// Event Pipeline Integration Attacher Hooks
-if ($("generate")) $("generate").addEventListener("click", fillPDF);
-if ($("resetAll")) $("resetAll").addEventListener("click", window.resetFormAndReload);
+    const factor = 0.35;    // scale
+    const posX = 380;         // X position on PDF
+    const posY = 145;        // Y position on PDF
 
-/* ---------- MULTI-STEP VISUAL PROGRESSION WIZARD TRACKER ---------- */
-const steps = document.querySelectorAll(".wizard-step");
-const indicatorSteps = document.querySelectorAll(".step");
-const nextBtn = document.getElementById("nextBtn");
-const prevBtn = document.getElementById("prevBtn");
-let currentStep = 0;
+    drawW *= factor;
+    drawH *= factor;
 
-if (indicatorSteps.length > 0) {
-    indicatorSteps.forEach((stepCircle, index) => {
-        stepCircle.addEventListener("click", () => {
-            navigateTo(index);
-        });
+    page.drawImage(imgPolicyowner, {
+      x: posX,
+      y: posY,
+      width: drawW,
+      height: drawH
     });
+  } catch (e) {
+    console.error(e);
+  }
 }
 
-function navigateTo(index) {
-    if (index < 0 || index >= steps.length) return;
+// Witness signature
+const sigWitness = localStorage.getItem("ata_sig_witness");
+if (sigWitness) {
+  try {
+    const imgWitness = await pdfDoc.embedPng(sigWitness);
+    const { width, height } = imgWitness.size();
 
-    steps[currentStep].classList.remove("active");
-    indicatorSteps[currentStep].classList.remove("active");
+    const previewEl = document.getElementById("preview_witness");
+    const boxW = previewEl.offsetWidth;
+    const boxH = previewEl.offsetHeight;
 
-    currentStep = index;
+    const scale = Math.min(boxW / width, boxH / height);
+    let drawW = width * scale;
+    let drawH = height * scale;
 
-    steps[currentStep].classList.add("active");
-    indicatorSteps[currentStep].classList.add("active");
+    const factor = 0.35;    // scale
+    const posX = 50;         // X position on PDF
+    const posY = 145;        // Y position on PDF
 
-    if (prevBtn) {
-        prevBtn.style.visibility = (currentStep === 0) ? "hidden" : "visible";
-    }
+    drawW *= factor;
+    drawH *= factor;
 
-    if (nextBtn) {
-        if (currentStep === steps.length - 1) {
-            nextBtn.style.display = "none";
-        } else {
-            nextBtn.style.display = "block";
-            nextBtn.innerText = "Next Step";
-        }
-    }
-
-    const mainContainer = document.querySelector('main');
-    if (mainContainer) {
-        mainContainer.scrollIntoView({ behavior: 'smooth' });
-    }
-}
-
-window.changeStep = function(n) {
-    let newStep = currentStep + n;
-    if (newStep >= 0 && newStep < steps.length) {
-        navigateTo(newStep);
-    }
-};
-
-// iOS-Style Back Navigation Interceptor
-const backToMainLink = document.getElementById("backToMainLink");
-if (backToMainLink) {
-    backToMainLink.addEventListener("click", function(e) {
-        e.preventDefault();
-        
-        if (document.referrer && document.referrer.includes(window.location.hostname)) {
-            window.history.back();
-        } else {
-            window.location.href = "dashboard.html";
-        }
+    page.drawImage(imgWitness, {
+      x: posX,
+      y: posY,
+      width: drawW,
+      height: drawH
     });
+  } catch (e) {
+    console.error(e);
+  }
 }
-    
+
+    //Flatten PDF
+    form.flatten();
+
+    //Save + Download
+    const pdfBytes = await pdfDoc.save();
+    const blob = new Blob([pdfBytes], { type: "application/pdf" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = "Amendment_to_Application_LF1042_filled.pdf";
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+    setTimeout(()=> URL.revokeObjectURL(url), 2500);
+
+  } catch(err){
+    alert("PDF generation failed: " + (err.message || err));
+    console.error(err);
+  } finally {
+    $("generate").disabled = false;
+  }
+}
+
+  //Autobind - Bind text inputs, textareas, and selects
+  // binding = connection between field ↔️ localStorage
+document.querySelectorAll("input[type=text], textarea, select").forEach(autoBindSave);
+
+  // Attach when page loads
+$("generate").addEventListener("click", fillPDF);
+$("resetAll").addEventListener("click", () => {
+  localStorage.clear();
+  location.reload();
+});
+  
 </script>
-    
-<script>
-    function toggleMobileMenu() {
-        const nav = document.getElementById('navMenu');
-        if (nav) nav.classList.toggle('show');
-    }
-</script>
-    
+</main> 
 </body>
 </html>
